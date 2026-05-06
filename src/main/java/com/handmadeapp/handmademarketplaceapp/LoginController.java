@@ -8,12 +8,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.util.ResourceBundle;
 
-
 /**
- * 
+ *
  * @author haryad
  */
-
 public class LoginController {
 
     @FXML
@@ -22,11 +20,10 @@ public class LoginController {
     private PasswordField passwordField;
     @FXML
     private Label errorLabel;
-    
 
 //    
     public void initialize(URL url, ResourceBundle rb) {
-       
+
     }
 
     @FXML
@@ -42,8 +39,13 @@ public class LoginController {
         try (Connection conn = DBConnection.getConnection()) {
 
             // Search by username, email, OR phone (from addresses table)
-            String sql = "SELECT DISTINCT u.*\n" + "FROM users u\n" + "LEFT JOIN addresses a ON u.user_id = a.user_id\n" + "WHERE u.username = ?\n" + "   OR u.email    = ?\n" + "   OR a.phone    = ?\n" + "LIMIT 1\n";
-
+            String sql = "SELECT DISTINCT u.* "
+                    + "FROM users u "
+                    + "LEFT JOIN addresses a ON u.user_id = a.user_id "
+                    + "WHERE u.username = ? "
+                    + "OR u.email = ? "
+                    + "OR a.phone = ? "
+                    + "LIMIT 1";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, identifier);
             ps.setString(2, identifier);
