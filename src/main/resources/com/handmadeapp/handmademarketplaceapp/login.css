@@ -1,0 +1,149 @@
+
+.root {
+    -fx-background-color: #f4f5f9;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ══════════════════════════════
+   LEFT PANEL
+══════════════════════════════ */
+.left-panel {
+    -fx-background-color: #1d2d6b;
+    -fx-padding: 60;
+    -fx-spacing: 12;
+    -fx-alignment: CENTER;
+}
+
+.brand-name {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-letter-spacing: 1;
+}
+
+.brand-sub {
+    -fx-font-size: 13px;
+    -fx-text-fill: #9daee8;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.brand-tagline {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7a8fd4;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* ══════════════════════════════
+   RIGHT PANEL
+══════════════════════════════ */
+.right-panel {
+    -fx-background-color: white;
+    -fx-padding: 60;
+    -fx-spacing: 14;
+    -fx-alignment: CENTER;
+}
+
+/* ── Heading ── */
+.login-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1d2d6b;
+}
+
+.login-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #999;
+}
+
+/* ── Field Labels ── */
+.field-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #444;
+}
+
+/* ── Text Fields ── */
+.login-field {
+    -fx-pref-width: 360px;
+    -fx-pref-height: 42px;
+    -fx-font-size: 13px;
+    -fx-background-color: #f8f9fc;
+    -fx-border-color: #d5d9e8;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0 12 0 12;
+    -fx-text-fill: #222;
+    -fx-prompt-text-fill: #aab;
+}
+
+.login-field:focused {
+    -fx-border-color: #1d2d6b;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(29,45,107,0.15), 8, 0, 0, 0);
+}
+
+/* ── Error Label ── */
+.error-label {
+    -fx-text-fill: #b8372a;
+    -fx-font-size: 12px;
+    -fx-pref-width: 360px;
+}
+
+/* ── Login Button ── */
+.login-btn {
+    -fx-pref-width: 360px;
+    -fx-pref-height: 44px;
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+.login-btn:hover {
+    -fx-background-color: #9c2d22;
+    -fx-effect: dropshadow(gaussian, rgba(184,55,42,0.35), 10, 0, 0, 3);
+}
+
+.login-btn:pressed {
+    -fx-background-color: #821f17;
+}
+
+/* ── Separator ── */
+.login-separator {
+    -fx-pref-width: 360px;
+    -fx-border-color: #e8e8e8;
+}
+
+/* ── Footer Text ── */
+.footer-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #777;
+}
+
+/* ── Register Link Button ── */
+.link-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1d2d6b;
+    -fx-underline: true;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+.link-btn:hover {
+    -fx-text-fill: #b8372a;
+}
+
+/* ── VBox wrappers for fields ── */
+.field-box {
+    -fx-pref-width: 360px;
+    -fx-spacing: 6;
+}
