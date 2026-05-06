@@ -24,7 +24,7 @@ public class LoginController {
     private Label errorLabel;
     
 
-    
+//    
     public void initialize(URL url, ResourceBundle rb) {
        
     }
