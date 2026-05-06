@@ -1,5 +1,9 @@
 package com.handmadeapp.handmademarketplaceapp;
 
+/**
+ * @author haryad
+*/
+
 public class SessionManager {
     private static User currentUser;
 

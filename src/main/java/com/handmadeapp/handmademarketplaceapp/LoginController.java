@@ -9,6 +9,11 @@ import java.sql.*;
 import java.util.ResourceBundle;
 
 
+/**
+ * 
+ * @author haryad
+ */
+
 public class LoginController {
 
     @FXML

@@ -11,7 +11,7 @@ import javafx.fxml.Initializable;
 /**
  * FXML Controller class
  *
- * @author MICROHEM
+ * @author Haryad
  */
 public class DashboardController implements Initializable {
 

@@ -1,5 +1,10 @@
 package com.handmadeapp.handmademarketplaceapp;
 
+/**
+ * 
+ * @author haryad
+ */
+
 public class User {
     private int userId;
     private String username;
