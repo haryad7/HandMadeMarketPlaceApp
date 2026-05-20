@@ -83,7 +83,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void goCart() {
-        comingSoon("My Cart");
+        navigate("Cart.fxml", "SparkCraft - My Cart");
     }
 
     @FXML
@@ -94,17 +94,17 @@ public class DashboardController implements Initializable {
     /* ─── Seller navigation ───────────────────────────────────────── */
     @FXML
     private void goShop() {
-        comingSoon("My Shop");
+        navigate("ShopManagement.fxml", "SparkCraft - My Shop");
     }
 
     @FXML
     private void goProductManagement() {
-        comingSoon("Manage Products");
+        navigate("ProductManagement.fxml", "SparkCraft - Manage Products");
     }
 
     @FXML
     private void goInventory() {
-        comingSoon("Inventory");
+        navigate("Inventory.fxml", "SparkCraft - Inventory");
     }
 
     @FXML

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox prefHeight="700" prefWidth="1150"
+      stylesheets="@dashboard.css"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.handmadeapp.handmademarketplaceapp.ProductListingController">
+
+    <!-- ═══ SIDEBAR (reuse dashboard style) ═══ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"           styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace" styleClass="sidebar-brand-sub"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="..." styleClass="sidebar-user-name"/>
+            <Label text="BUYER" styleClass="role-badge role-badge-buyer"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+            <Label text="BUYER" styleClass="nav-section-label"/>
+            <Button text="  Browse Products" onAction="#goBrowseProducts" styleClass="nav-btn nav-btn-active" maxWidth="Infinity"/>
+            <Button text="  My Cart"         onAction="#goCart"           styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  My Orders"       onAction="#goOrders"         styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Messages"        onAction="#goMessages"       styleClass="nav-btn" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="sidebar-footer">
+            <Button text="← Dashboard" onAction="#goDashboard" styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+        <!-- Top bar: search + filter -->
+        <HBox styleClass="topbar" spacing="12" alignment="CENTER_LEFT">
+            <Label text="Browse Products" styleClass="topbar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="searchField" promptText="🔍  Search products…"
+                       styleClass="search-field" prefWidth="260" onAction="#handleSearch"/>
+            <ComboBox fx:id="categoryFilter" promptText="All Categories"
+                      styleClass="filter-combo" prefWidth="170" onAction="#handleCategoryFilter"/>
+            <Button text="Search" onAction="#handleSearch" styleClass="topbar-btn"/>
+        </HBox>
+
+        <!-- Result count label -->
+        <HBox styleClass="result-bar" alignment="CENTER_LEFT">
+            <Label fx:id="resultCountLabel" text="Loading products…" styleClass="result-count"/>
+        </HBox>
+
+        <!-- Product grid inside a ScrollPane -->
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" VBox.vgrow="ALWAYS">
+            <FlowPane fx:id="productGrid" hgap="20" vgap="20" styleClass="product-grid"/>
+        </ScrollPane>
+    </VBox>
+</HBox>

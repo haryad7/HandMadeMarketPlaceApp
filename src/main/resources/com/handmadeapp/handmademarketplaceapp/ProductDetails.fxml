@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<HBox prefHeight="700" prefWidth="1150"
+      stylesheets="@dashboard.css"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.handmadeapp.handmademarketplaceapp.ProductDetailsController">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"           styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace" styleClass="sidebar-brand-sub"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="..." styleClass="sidebar-user-name"/>
+            <Label text="BUYER" styleClass="role-badge role-badge-buyer"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+            <Label text="BUYER" styleClass="nav-section-label"/>
+            <Button text="  Browse Products" onAction="#goBrowseProducts" styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  My Cart"         onAction="#goCart"           styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  My Orders"       onAction="#goOrders"         styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Messages"        onAction="#goMessages"       styleClass="nav-btn" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="sidebar-footer">
+            <Button text="← Back" onAction="#goBack" styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" HBox.hgrow="ALWAYS">
+        <VBox styleClass="main-content" spacing="28">
+
+            <!-- Header breadcrumb -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Button text="← Browse" onAction="#goBack" styleClass="link-back-btn"/>
+                <Label text="/" styleClass="breadcrumb-sep"/>
+                <Label fx:id="breadcrumbLabel" text="Product" styleClass="breadcrumb-cur"/>
+            </HBox>
+
+            <!-- Top section: image + info -->
+            <HBox spacing="32">
+
+                <!-- Image placeholder -->
+                <VBox styleClass="img-panel" alignment="CENTER" prefWidth="340" prefHeight="300">
+                    <Label fx:id="imgPlaceholderLabel" text="📦" styleClass="img-placeholder-icon"/>
+                    <Label text="No image available" styleClass="img-placeholder-text"/>
+                </VBox>
+
+                <!-- Right info -->
+                <VBox spacing="14" VBox.vgrow="ALWAYS">
+                    <Label fx:id="productTitleLabel" text="Product Title" styleClass="detail-title"/>
+                    <Label fx:id="shopNameLabel"     text="by Shop Name" styleClass="detail-shop"/>
+                    <Separator/>
+                    <Label fx:id="priceLabel" text="$0.00" styleClass="detail-price"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Stock:" styleClass="detail-meta-key"/>
+                        <Label fx:id="stockLabel" text="—" styleClass="detail-meta-val"/>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Category:" styleClass="detail-meta-key"/>
+                        <Label fx:id="categoryLabel" text="—" styleClass="detail-meta-val"/>
+                    </HBox>
+
+                    <!-- Qty selector + Add to Cart -->
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Qty:" styleClass="detail-meta-key"/>
+                        <Spinner fx:id="qtySpinner" min="1" max="99" initialValue="1"
+                                 prefWidth="80" styleClass="qty-spinner"/>
+                        <Button text="🛒  Add to Cart" onAction="#handleAddToCart"
+                                styleClass="add-to-cart-btn"/>
+                    </HBox>
+
+                    <Label fx:id="cartFeedbackLabel" text="" styleClass="feedback-label"/>
+                </VBox>
+            </HBox>
+
+            <!-- Description -->
+            <VBox styleClass="section-card" spacing="10">
+                <Label text="Description" styleClass="section-heading"/>
+                <Label fx:id="descriptionLabel" text="" wrapText="true" styleClass="detail-desc"/>
+            </VBox>
+
+            <!-- Reviews -->
+            <VBox styleClass="section-card" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Label text="Customer Reviews" styleClass="section-heading"/>
+                    <Label fx:id="avgRatingLabel" text="" styleClass="avg-rating-badge"/>
+                </HBox>
+                <ScrollPane fitToWidth="true" prefHeight="200" styleClass="review-scroll">
+                    <VBox fx:id="reviewsBox" spacing="10" styleClass="reviews-inner"/>
+                </ScrollPane>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+</HBox>

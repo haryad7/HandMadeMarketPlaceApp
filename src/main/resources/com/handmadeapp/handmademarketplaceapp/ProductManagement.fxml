@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<HBox prefHeight="700" prefWidth="1150"
+      stylesheets="@dashboard.css"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.handmadeapp.handmademarketplaceapp.ProductManagementController">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"           styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace" styleClass="sidebar-brand-sub"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="..." styleClass="sidebar-user-name"/>
+            <Label text="SELLER" styleClass="role-badge role-badge-seller"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+            <Label text="SELLER" styleClass="nav-section-label"/>
+            <Button text="  My Shop"         onAction="#goShop"              styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Manage Products" onAction="#goProductManagement" styleClass="nav-btn nav-btn-active" maxWidth="Infinity"/>
+            <Button text="  Inventory"       onAction="#goInventory"         styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Order Mgmt"      onAction="#goOrderManagement"   styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Messages"        onAction="#goMessages"          styleClass="nav-btn" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="sidebar-footer">
+            <Button text="← Dashboard" onAction="#goDashboard" styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+        <!-- Topbar -->
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="12">
+            <Label text="Manage Products" styleClass="topbar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="+ Add New Product" onAction="#handleAddNew" styleClass="topbar-btn"/>
+        </HBox>
+
+        <HBox VBox.vgrow="ALWAYS" spacing="0">
+
+            <!-- Left: product table -->
+            <VBox HBox.hgrow="ALWAYS" spacing="0">
+                <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+                    <columns>
+                        <TableColumn fx:id="colId"       text="ID"       prefWidth="55"/>
+                        <TableColumn fx:id="colTitle"    text="Title"    prefWidth="220"/>
+                        <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
+                        <TableColumn fx:id="colPrice"    text="Price"    prefWidth="90"/>
+                        <TableColumn fx:id="colStock"    text="Stock"    prefWidth="70"/>
+                        <TableColumn fx:id="colActive"   text="Active"   prefWidth="70"/>
+                        <TableColumn fx:id="colActions"  text="Actions"  prefWidth="120"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No products yet. Click '+ Add New Product' to start." styleClass="table-empty-label"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- Right: Add/Edit form panel -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefWidth="340"
+                        styleClass="form-side-panel">
+                <VBox spacing="14" styleClass="form-side-inner">
+                    <Label fx:id="formTitleLabel" text="Add Product" styleClass="section-heading"/>
+
+                    <VBox spacing="6">
+                        <Label text="Title *" styleClass="field-label"/>
+                        <TextField fx:id="titleField" promptText="Product title"
+                                   styleClass="login-field" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Category" styleClass="field-label"/>
+                        <ComboBox fx:id="categoryCombo" promptText="Select category"
+                                  styleClass="filter-combo" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <HBox spacing="12">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Price ($) *" styleClass="field-label"/>
+                            <TextField fx:id="priceField" promptText="0.00"
+                                       styleClass="login-field" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Stock *" styleClass="field-label"/>
+                            <TextField fx:id="stockField" promptText="0"
+                                       styleClass="login-field" maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox spacing="6">
+                        <Label text="Description" styleClass="field-label"/>
+                        <TextArea fx:id="descField" promptText="Product description…"
+                                  styleClass="form-textarea" prefRowCount="4" wrapText="true" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Image URL (optional)" styleClass="field-label"/>
+                        <TextField fx:id="imageUrlField" promptText="https://…"
+                                   styleClass="login-field" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <CheckBox fx:id="activeCheck" text="Product is active (visible to buyers)"
+                              styleClass="form-checkbox" selected="true"/>
+
+                    <Label fx:id="formFeedbackLabel" text="" styleClass="feedback-label" wrapText="true"/>
+
+                    <HBox spacing="10">
+                        <Button text="Save" onAction="#handleSave"
+                                styleClass="add-to-cart-btn" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Button text="Clear" onAction="#handleClear"
+                                styleClass="continue-btn" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    </HBox>
+                </VBox>
+            </ScrollPane>
+        </HBox>
+    </VBox>
+</HBox>

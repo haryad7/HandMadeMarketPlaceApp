@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<HBox prefHeight="700" prefWidth="1150"
+      stylesheets="@dashboard.css"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.handmadeapp.handmademarketplaceapp.CartController">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"           styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace" styleClass="sidebar-brand-sub"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="..." styleClass="sidebar-user-name"/>
+            <Label text="BUYER" styleClass="role-badge role-badge-buyer"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+            <Label text="BUYER" styleClass="nav-section-label"/>
+            <Button text="  Browse Products" onAction="#goBrowseProducts" styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  My Cart"         onAction="#goCart"           styleClass="nav-btn nav-btn-active" maxWidth="Infinity"/>
+            <Button text="  My Orders"       onAction="#goOrders"         styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Messages"        onAction="#goMessages"       styleClass="nav-btn" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="sidebar-footer">
+            <Button text="← Dashboard" onAction="#goDashboard" styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+        <!-- Top bar -->
+        <HBox styleClass="topbar" alignment="CENTER_LEFT">
+            <Label text="🛒  My Cart" styleClass="topbar-title"/>
+        </HBox>
+
+        <HBox VBox.vgrow="ALWAYS" spacing="0">
+
+            <!-- Cart items list -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll" HBox.hgrow="ALWAYS">
+                <VBox fx:id="cartItemsBox" styleClass="cart-items-container" spacing="12"/>
+            </ScrollPane>
+
+            <!-- Order summary panel -->
+            <VBox styleClass="order-summary-panel" prefWidth="280" spacing="16">
+                <Label text="Order Summary" styleClass="section-heading"/>
+                <Separator/>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Items:" styleClass="summary-key"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="itemCountLabel" text="0" styleClass="summary-val"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Subtotal:" styleClass="summary-key"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="subtotalLabel" text="$0.00" styleClass="summary-val"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Shipping:" styleClass="summary-key"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="Free" styleClass="summary-val-green"/>
+                </HBox>
+
+                <Separator/>
+
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Total:" styleClass="summary-total-key"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="totalLabel" text="$0.00" styleClass="summary-total-val"/>
+                </HBox>
+
+                <Button text="Proceed to Checkout" onAction="#handleCheckout"
+                        styleClass="checkout-btn" maxWidth="Infinity"/>
+                <Button text="Continue Shopping" onAction="#goBrowseProducts"
+                        styleClass="continue-btn" maxWidth="Infinity"/>
+
+                <Label fx:id="checkoutFeedbackLabel" text="" styleClass="feedback-label" wrapText="true"/>
+            </VBox>
+        </HBox>
+    </VBox>
+</HBox>

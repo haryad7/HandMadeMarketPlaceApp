@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<HBox prefHeight="700" prefWidth="1150"
+      stylesheets="@dashboard.css"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.handmadeapp.handmademarketplaceapp.InventoryController">
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"           styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace" styleClass="sidebar-brand-sub"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="..." styleClass="sidebar-user-name"/>
+            <Label text="SELLER" styleClass="role-badge role-badge-seller"/>
+        </VBox>
+        <Separator styleClass="sidebar-sep"/>
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+            <Label text="SELLER" styleClass="nav-section-label"/>
+            <Button text="  My Shop"         onAction="#goShop"              styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Manage Products" onAction="#goProductManagement" styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Inventory"       onAction="#goInventory"         styleClass="nav-btn nav-btn-active" maxWidth="Infinity"/>
+            <Button text="  Order Mgmt"      onAction="#goOrderManagement"   styleClass="nav-btn" maxWidth="Infinity"/>
+            <Button text="  Messages"        onAction="#goMessages"          styleClass="nav-btn" maxWidth="Infinity"/>
+        </VBox>
+        <VBox styleClass="sidebar-footer">
+            <Button text="← Dashboard" onAction="#goDashboard" styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+        <!-- Top bar -->
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="12">
+            <Label text="Inventory" styleClass="topbar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Low-stock threshold:" styleClass="field-label"/>
+            <Spinner fx:id="thresholdSpinner" min="1" max="50" initialValue="5"
+                     prefWidth="80" styleClass="qty-spinner" onValueChange="#handleThresholdChange"/>
+            <Button text="Refresh" onAction="#loadInventory" styleClass="topbar-btn"/>
+        </HBox>
+
+        <!-- Summary strip -->
+        <HBox styleClass="inventory-summary-bar" spacing="0">
+            <VBox styleClass="inv-stat-box" HBox.hgrow="ALWAYS" alignment="CENTER">
+                <Label fx:id="totalProductsLabel" text="0" styleClass="inv-stat-num"/>
+                <Label text="Total Products"      styleClass="inv-stat-lbl"/>
+            </VBox>
+            <Separator orientation="VERTICAL"/>
+            <VBox styleClass="inv-stat-box" HBox.hgrow="ALWAYS" alignment="CENTER">
+                <Label fx:id="inStockLabel" text="0" styleClass="inv-stat-num inv-stat-green"/>
+                <Label text="In Stock"      styleClass="inv-stat-lbl"/>
+            </VBox>
+            <Separator orientation="VERTICAL"/>
+            <VBox styleClass="inv-stat-box" HBox.hgrow="ALWAYS" alignment="CENTER">
+                <Label fx:id="lowStockLabel" text="0" styleClass="inv-stat-num inv-stat-orange"/>
+                <Label text="Low Stock"      styleClass="inv-stat-lbl"/>
+            </VBox>
+            <Separator orientation="VERTICAL"/>
+            <VBox styleClass="inv-stat-box" HBox.hgrow="ALWAYS" alignment="CENTER">
+                <Label fx:id="outOfStockLabel" text="0" styleClass="inv-stat-num inv-stat-red"/>
+                <Label text="Out of Stock"     styleClass="inv-stat-lbl"/>
+            </VBox>
+        </HBox>
+
+        <!-- Inventory table -->
+        <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colId"     text="ID"      prefWidth="55"/>
+                <TableColumn fx:id="colTitle"  text="Product" prefWidth="260"/>
+                <TableColumn fx:id="colCat"    text="Category" prefWidth="140"/>
+                <TableColumn fx:id="colStock"  text="Stock"   prefWidth="80"/>
+                <TableColumn fx:id="colStatus" text="Status"  prefWidth="110"/>
+                <TableColumn fx:id="colEdit"   text="Update"  prefWidth="120"/>
+            </columns>
+            <placeholder>
+                <Label text="No products found." styleClass="table-empty-label"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+</HBox>
