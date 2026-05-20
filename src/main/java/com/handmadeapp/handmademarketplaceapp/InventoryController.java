@@ -58,6 +58,10 @@ public class InventoryController implements Initializable {
             userNameLabel.setText(user.getFullName());
         }
 
+        thresholdSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, threshold));
+        thresholdSpinner.valueProperty().addListener((obs, oldValue, newValue) -> loadInventory());
+
         resolveShop();
         setupTable();
         loadInventory();
@@ -236,12 +240,12 @@ public class InventoryController implements Initializable {
 
     @FXML
     private void goOrderManagement() {
-        comingSoon("Order Management");
+        App.loadScene("OrderManagement.fxml", "SparkCraft - Order Management");
     }
 
     @FXML
     private void goMessages() {
-        comingSoon("Messages");
+        App.loadScene("Messaging.fxml", "SparkCraft - Messages");
     }
 
     @FXML

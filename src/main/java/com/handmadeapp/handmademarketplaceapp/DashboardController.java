@@ -70,7 +70,7 @@ public class DashboardController implements Initializable {
         show(sellerSection, role.equals("seller"));
         show(adminSection, role.equals("admin"));
 
-        show(buyerCards, role.equals("buyer"));
+        show(buyerCards, role.equals("buyer") || role.equals("seller"));
         show(sellerCards, role.equals("seller"));
         show(adminCards, role.equals("admin"));
     }
@@ -88,7 +88,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void goOrders() {
-        comingSoon("My Orders");
+        navigate("MyOrders.fxml", "SparkCraft - My Orders");
     }
 
     /* ─── Seller navigation ───────────────────────────────────────── */
@@ -109,7 +109,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void goOrderManagement() {
-        comingSoon("Order Management");
+        navigate("OrderManagement.fxml", "SparkCraft - Order Management");
     }
 
     /* ─── Admin navigation ────────────────────────────────────────── */
@@ -136,7 +136,7 @@ public class DashboardController implements Initializable {
     /* ─── Shared ──────────────────────────────────────────────────── */
     @FXML
     private void goMessages() {
-        comingSoon("Messages");
+        navigate("Messaging.fxml", "SparkCraft - Messages");
     }
 
     /* ─── Logout ──────────────────────────────────────────────────── */

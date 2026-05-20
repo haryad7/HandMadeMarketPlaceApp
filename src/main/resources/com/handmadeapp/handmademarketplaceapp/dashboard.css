@@ -4,6 +4,30 @@
 .root {
     -fx-background-color: #f4f5f9;
     -fx-font-family: "Segoe UI";
+    -fx-accent: #b8372a;
+    -fx-focus-color: #b8372a;
+    -fx-faint-focus-color: rgba(184,55,42,0.12);
+    -fx-highlight-fill: #b8372a;
+    -fx-highlight-text-fill: white;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected,
+.combo-box-popup .list-view .list-cell:filled:hover,
+.list-view .list-cell:filled:selected,
+.table-row-cell:selected {
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #9da7c7;
+    -fx-background-radius: 8;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #b8372a;
 }
 
 /* ══════════════════════════════════════════════
@@ -589,3 +613,13 @@
     -fx-cursor: hand;
 }
 .delete-btn:hover { -fx-background-color: #8a2010; }
+
+.combo-box-popup .list-view .list-cell:filled:selected,
+.combo-box-popup .list-view .list-cell:filled:hover,
+.list-view .list-cell:filled:selected,
+.table-view .table-row-cell:selected,
+.data-table .table-row-cell:selected,
+.table-row-cell:selected {
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+}

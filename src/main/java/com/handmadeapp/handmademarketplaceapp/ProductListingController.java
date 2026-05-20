@@ -59,7 +59,7 @@ public class ProductListingController implements Initializable {
 
         StringBuilder sql = new StringBuilder(
             "SELECT p.product_id, p.title, p.price, p.stock_quantity, " +
-            "       c.name AS category_name, s.name AS shop_name " +
+            "       c.name AS category_name, s.name AS shop_name, s.owner_id AS seller_id " +
             "FROM   products p " +
             "LEFT JOIN categories c ON p.category_id = c.category_id " +
             "LEFT JOIN shops      s ON p.shop_id      = s.shop_id " +
@@ -86,7 +86,8 @@ public class ProductListingController implements Initializable {
                     rs.getString("shop_name"),
                     rs.getString("category_name"),
                     rs.getDouble("price"),
-                    rs.getInt("stock_quantity")
+                    rs.getInt("stock_quantity"),
+                    rs.getInt("seller_id")
                 ));
             }
         } catch (SQLException e) {
@@ -98,7 +99,7 @@ public class ProductListingController implements Initializable {
 
     /* ── Build a single product card VBox ─────────────────────────── */
     private VBox buildProductCard(int productId, String title, String shopName,
-                                   String category, double price, int stock) {
+                                   String category, double price, int stock, int sellerId) {
         VBox card = new VBox(8);
         card.getStyleClass().add("product-card");
         card.setPrefWidth(200);
@@ -130,7 +131,14 @@ public class ProductListingController implements Initializable {
         viewBtn.setMaxWidth(Double.MAX_VALUE);
         viewBtn.setOnAction(e -> openProductDetails(productId));
 
-        card.getChildren().addAll(catLabel, titleLabel, shopLabel, priceLabel, stockLabel, spacer, viewBtn);
+        Button cartBtn = new Button("Add to Cart");
+        cartBtn.getStyleClass().add("add-to-cart-btn");
+        cartBtn.setMaxWidth(Double.MAX_VALUE);
+        cartBtn.setDisable(stock <= 0 || isOwnProduct(sellerId));
+        cartBtn.setText(isOwnProduct(sellerId) ? "Your Product" : "Add to Cart");
+        cartBtn.setOnAction(e -> addToCart(productId, stock, sellerId));
+
+        card.getChildren().addAll(catLabel, titleLabel, shopLabel, priceLabel, stockLabel, spacer, viewBtn, cartBtn);
         return card;
     }
 
@@ -138,6 +146,54 @@ public class ProductListingController implements Initializable {
     private void openProductDetails(int productId) {
         ProductDetailsController.setTargetProductId(productId);
         App.loadScene("ProductDetails.fxml", "SparkCraft - Product Details");
+    }
+
+    private void addToCart(int productId, int stock, int sellerId) {
+        User user = SessionManager.getCurrentUser();
+        if (user == null) {
+            App.loadScene("login.fxml", "SparkCraft - Login");
+            return;
+        }
+        if (sellerId == user.getUserId()) {
+            showInfo("Cart", "You cannot buy products from your own shop.");
+            return;
+        }
+        if (stock <= 0) {
+            showInfo("Cart", "This product is out of stock.");
+            return;
+        }
+
+        CartController.ensureCartTable();
+        String checkSql = "SELECT cart_id, quantity FROM cart WHERE buyer_id = ? AND product_id = ?";
+        String insertSql = "INSERT INTO cart (buyer_id, product_id, quantity) VALUES (?, ?, 1)";
+        String updateSql = "UPDATE cart SET quantity = ? WHERE cart_id = ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement check = con.prepareStatement(checkSql)) {
+            check.setInt(1, user.getUserId());
+            check.setInt(2, productId);
+            ResultSet rs = check.executeQuery();
+
+            if (rs.next()) {
+                int cartId = rs.getInt("cart_id");
+                int nextQty = Math.min(rs.getInt("quantity") + 1, stock);
+                try (PreparedStatement update = con.prepareStatement(updateSql)) {
+                    update.setInt(1, nextQty);
+                    update.setInt(2, cartId);
+                    update.executeUpdate();
+                }
+            } else {
+                try (PreparedStatement insert = con.prepareStatement(insertSql)) {
+                    insert.setInt(1, user.getUserId());
+                    insert.setInt(2, productId);
+                    insert.executeUpdate();
+                }
+            }
+            showInfo("Cart", "Product added to cart.");
+        } catch (SQLException e) {
+            System.err.println("[ProductListing] addToCart: " + e.getMessage());
+            showInfo("Cart", "Could not add product to cart: " + e.getMessage());
+        }
     }
 
     /* ── FXML handlers ────────────────────────────────────────────── */
@@ -159,13 +215,26 @@ public class ProductListingController implements Initializable {
     /* ── Navigation ───────────────────────────────────────────────── */
     @FXML private void goBrowseProducts() { App.loadScene("ProductListing.fxml", "SparkCraft - Browse"); }
     @FXML private void goCart()            { App.loadScene("Cart.fxml",           "SparkCraft - My Cart"); }
-    @FXML private void goOrders()          { comingSoon("My Orders"); }
-    @FXML private void goMessages()        { comingSoon("Messages"); }
+    @FXML private void goOrders()          { App.loadScene("MyOrders.fxml", "SparkCraft - My Orders"); }
+    @FXML private void goMessages()        { App.loadScene("Messaging.fxml", "SparkCraft - Messages"); }
     @FXML private void goDashboard()       { App.loadScene("Dashboard.fxml",      "SparkCraft"); }
 
     private void comingSoon(String name) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle("Coming Soon"); a.setHeaderText(name);
         a.setContentText("This screen is being built."); a.showAndWait();
+    }
+
+    private void showInfo(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean isOwnProduct(int sellerId) {
+        User user = SessionManager.getCurrentUser();
+        return user != null && sellerId == user.getUserId();
     }
 }

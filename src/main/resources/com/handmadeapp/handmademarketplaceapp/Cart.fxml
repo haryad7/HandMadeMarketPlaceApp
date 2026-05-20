@@ -65,7 +65,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Subtotal:" styleClass="summary-key"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="subtotalLabel" text="$0.00" styleClass="summary-val"/>
+                    <Label fx:id="subtotalLabel" text="0.00" styleClass="summary-val"/>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Shipping:" styleClass="summary-key"/>
@@ -78,7 +78,7 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Total:" styleClass="summary-total-key"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="totalLabel" text="$0.00" styleClass="summary-total-val"/>
+                    <Label fx:id="totalLabel" text="0.00" styleClass="summary-total-val"/>
                 </HBox>
 
                 <Button text="Proceed to Checkout" onAction="#handleCheckout"

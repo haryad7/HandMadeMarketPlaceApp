@@ -133,8 +133,8 @@ public class ShopManagementController implements Initializable {
     @FXML private void goShop()              { App.loadScene("ShopManagement.fxml",  "SparkCraft - My Shop"); }
     @FXML private void goProductManagement() { App.loadScene("ProductManagement.fxml", "SparkCraft - Manage Products"); }
     @FXML private void goInventory()         { App.loadScene("Inventory.fxml",         "SparkCraft - Inventory"); }
-    @FXML private void goOrderManagement()   { comingSoon("Order Management"); }
-    @FXML private void goMessages()          { comingSoon("Messages"); }
+    @FXML private void goOrderManagement()   { App.loadScene("OrderManagement.fxml", "SparkCraft - Order Management"); }
+    @FXML private void goMessages()          { App.loadScene("Messaging.fxml",       "SparkCraft - Messages"); }
     @FXML private void goDashboard()         { App.loadScene("Dashboard.fxml",         "SparkCraft"); }
 
     private void comingSoon(String name) {

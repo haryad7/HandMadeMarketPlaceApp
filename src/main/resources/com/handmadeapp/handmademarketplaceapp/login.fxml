@@ -15,10 +15,10 @@
            xmlns="http://javafx.com/javafx/21"
            fx:controller="com.handmadeapp.handmademarketplaceapp.LoginController"
            stylesheets="@login.css">
-    <HBox>
+    <HBox maxHeight="Infinity" maxWidth="Infinity">
 
         <!-- ═══ LEFT PANEL ═══ -->
-        <VBox styleClass="left-panel" prefWidth="380">
+        <VBox styleClass="left-panel" prefWidth="380" minWidth="340" maxWidth="420">
 
             <ImageView fx:id="logoImg"
                        fitWidth="180" fitHeight="180"
@@ -36,7 +36,7 @@
         </VBox>
 
         <!-- ═══ RIGHT PANEL ═══ -->
-        <VBox styleClass="right-panel" prefWidth="520">
+        <VBox styleClass="right-panel" maxWidth="Infinity" HBox.hgrow="ALWAYS">
 
             <Label text="Welcome Back!" styleClass="login-title"/>
             <Label text="Sign in to your account" styleClass="login-subtitle"/>

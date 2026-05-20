@@ -46,8 +46,7 @@
             <Label text="Inventory" styleClass="topbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label text="Low-stock threshold:" styleClass="field-label"/>
-            <Spinner fx:id="thresholdSpinner" min="1" max="50" initialValue="5"
-                     prefWidth="80" styleClass="qty-spinner" onValueChange="#handleThresholdChange"/>
+            <Spinner fx:id="thresholdSpinner" prefWidth="80" styleClass="qty-spinner"/>
             <Button text="Refresh" onAction="#loadInventory" styleClass="topbar-btn"/>
         </HBox>
 

@@ -58,6 +58,9 @@
             <!-- SELLER NAV -->
             <VBox fx:id="sellerSection" spacing="2">
                 <Label text="SELLER" styleClass="nav-section-label"/>
+                <Button text="  Browse Products"   onAction="#goBrowseProducts"   styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  My Cart"            onAction="#goCart"              styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  My Orders"          onAction="#goOrders"            styleClass="nav-btn" maxWidth="Infinity"/>
                 <Button text="  My Shop"            onAction="#goShop"              styleClass="nav-btn" maxWidth="Infinity"/>
                 <Button text="  Manage Products"    onAction="#goProductManagement" styleClass="nav-btn" maxWidth="Infinity"/>
                 <Button text="  Inventory"          onAction="#goInventory"         styleClass="nav-btn" maxWidth="Infinity"/>

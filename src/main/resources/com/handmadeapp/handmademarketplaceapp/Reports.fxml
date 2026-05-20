@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="760" prefWidth="1100"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21"
+            fx:controller="com.handmadeapp.handmademarketplaceapp.ReportsController"
+            stylesheets="@forms.css">
+
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label text="Reports &amp; Analytics"    styleClass="topbar-title"/>
+                <Label text="Revenue, orders and trends" styleClass="topbar-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Refresh"        onAction="#loadAll" styleClass="topbar-btn"/>
+            <Button text="← Admin Panel"  onAction="#goBack"  styleClass="topbar-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <!-- ═══ STAT TILES ═══ -->
+            <HBox spacing="14">
+                <VBox styleClass="stat-tile" HBox.hgrow="ALWAYS">
+                    <Label text="TOTAL REVENUE"           styleClass="stat-label"/>
+                    <Label fx:id="revenueLabel" text="0" styleClass="stat-value, stat-accent"/>
+                </VBox>
+                <VBox styleClass="stat-tile" HBox.hgrow="ALWAYS">
+                    <Label text="TOTAL ORDERS"            styleClass="stat-label"/>
+                    <Label fx:id="ordersLabel"  text="0"  styleClass="stat-value"/>
+                </VBox>
+                <VBox styleClass="stat-tile" HBox.hgrow="ALWAYS">
+                    <Label text="PAID ORDERS"             styleClass="stat-label"/>
+                    <Label fx:id="paidLabel"    text="0"  styleClass="stat-value"/>
+                </VBox>
+                <VBox styleClass="stat-tile" HBox.hgrow="ALWAYS">
+                    <Label text="ACTIVE USERS"            styleClass="stat-label"/>
+                    <Label fx:id="usersLabel"   text="0"  styleClass="stat-value"/>
+                </VBox>
+            </HBox>
+
+            <!-- ═══ CHARTS ═══ -->
+            <HBox spacing="14" VBox.vgrow="ALWAYS">
+                <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="6">
+                    <Label text="Revenue by Shop (top 6)" styleClass="card-title"/>
+                    <BarChart fx:id="revenueChart" legendVisible="false" VBox.vgrow="ALWAYS">
+                        <xAxis><CategoryAxis fx:id="revenueX"/></xAxis>
+                        <yAxis><NumberAxis    fx:id="revenueY"/></yAxis>
+                    </BarChart>
+                </VBox>
+                <VBox styleClass="card" prefWidth="380" spacing="6">
+                    <Label text="Orders by Status" styleClass="card-title"/>
+                    <PieChart fx:id="statusChart" VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </HBox>
+
+            <!-- ═══ TABLE ═══ -->
+            <VBox styleClass="card" spacing="8">
+                <Label text="Recent Orders" styleClass="card-title"/>
+                <TableView fx:id="recentTable" prefHeight="200">
+                    <columns>
+                        <TableColumn fx:id="rColId"     text="Order #" prefWidth="80"/>
+                        <TableColumn fx:id="rColBuyer"  text="Buyer"   prefWidth="200"/>
+                        <TableColumn fx:id="rColShop"   text="Shop"    prefWidth="200"/>
+                        <TableColumn fx:id="rColTotal"  text="Total"   prefWidth="120"/>
+                        <TableColumn fx:id="rColStatus" text="Status"  prefWidth="120"/>
+                        <TableColumn fx:id="rColDate"   text="Date"    prefWidth="180"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+
+<BorderPane prefHeight="720" prefWidth="1000"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21"
+            fx:controller="com.handmadeapp.handmademarketplaceapp.PaymentController"
+            stylesheets="@forms.css">
+
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label text="Checkout — Payment"   styleClass="topbar-title"/>
+                <Label text="Step 2 of 3"          styleClass="topbar-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="← Back" onAction="#goBack" styleClass="topbar-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox spacing="20">
+            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+            <!-- ═══ PAYMENT CARD ═══ -->
+            <VBox spacing="14" styleClass="card" HBox.hgrow="ALWAYS">
+                <Label text="Payment Method" styleClass="card-title"/>
+
+                <VBox spacing="4">
+                    <Label text="Pay with" styleClass="field-label"/>
+                    <ComboBox fx:id="methodBox" onAction="#handleMethodChange" styleClass="form-field" maxWidth="Infinity"/>
+                </VBox>
+
+                <VBox fx:id="cardDetailsBox" spacing="14">
+                <Label text="Card Details" styleClass="card-title">
+                    <padding><Insets top="10"/></padding>
+                </Label>
+
+                <VBox spacing="4">
+                    <Label text="Cardholder Name" styleClass="field-label"/>
+                    <TextField fx:id="cardholderField" promptText="Name on card" styleClass="form-field"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Card Number" styleClass="field-label"/>
+                    <TextField fx:id="cardNumberField" promptText="1234 5678 9012 3456" styleClass="form-field"/>
+                </VBox>
+
+                <GridPane hgap="14" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="33"/>
+                        <ColumnConstraints percentWidth="33"/>
+                        <ColumnConstraints percentWidth="34"/>
+                    </columnConstraints>
+
+                    <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Exp. Month" styleClass="field-label"/>
+                        <ComboBox fx:id="expMonthBox" styleClass="form-field" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Exp. Year" styleClass="field-label"/>
+                        <ComboBox fx:id="expYearBox" styleClass="form-field" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label text="CVV" styleClass="field-label"/>
+                        <PasswordField fx:id="cvvField" promptText="•••" styleClass="form-field"/>
+                    </VBox>
+                </GridPane>
+                </VBox>
+
+                <Label fx:id="errorLabel" text="" styleClass="error-label"/>
+
+                <HBox spacing="10">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="← Back"            onAction="#goBack"        styleClass="secondary-btn"/>
+                    <Button text="Place Order"       onAction="#handlePay"     styleClass="primary-btn"/>
+                </HBox>
+            </VBox>
+
+            <!-- ═══ SUMMARY ═══ -->
+            <VBox styleClass="summary-panel" prefWidth="280" spacing="8">
+                <Label text="ORDER SUMMARY"          styleClass="summary-title"/>
+                <Label fx:id="subtotalLine" text="Subtotal: $0.00" styleClass="summary-line"/>
+                <Label fx:id="shippingLine" text="Shipping: $0.00" styleClass="summary-line"/>
+                <Label                       text="Tax: $0.00"     styleClass="summary-line"/>
+                <Region prefHeight="10"/>
+                <Label text="TOTAL"                   styleClass="summary-line"/>
+                <Label fx:id="totalLine"  text="0.00" styleClass="summary-total"/>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

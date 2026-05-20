@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+
+<BorderPane prefHeight="720" prefWidth="1000"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21"
+            fx:controller="com.handmadeapp.handmademarketplaceapp.OrderController"
+            stylesheets="@forms.css">
+
+    <!-- ═══ TOP BAR ═══ -->
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label text="Checkout — Shipping &amp; Billing" styleClass="topbar-title"/>
+                <Label text="Step 1 of 3"                       styleClass="topbar-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="← Back to Cart" onAction="#goBack" styleClass="topbar-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox spacing="20">
+            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+            <!-- ═══ FORM CARD ═══ -->
+            <VBox spacing="14" styleClass="card" HBox.hgrow="ALWAYS">
+                <Label text="Shipping Address" styleClass="card-title"/>
+
+                <GridPane hgap="14" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Recipient Name" styleClass="field-label"/>
+                        <TextField fx:id="recipientField" promptText="Full name" styleClass="form-field"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Phone" styleClass="field-label"/>
+                        <TextField fx:id="phoneField" promptText="+964 ..." styleClass="form-field"/>
+                    </VBox>
+
+                    <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2">
+                        <Label text="Address Line 1" styleClass="field-label"/>
+                        <TextField fx:id="line1Field" promptText="Street address" styleClass="form-field"/>
+                    </VBox>
+
+                    <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
+                        <Label text="Address Line 2 (optional)" styleClass="field-label"/>
+                        <TextField fx:id="line2Field" promptText="Apt, suite, building" styleClass="form-field"/>
+                    </VBox>
+
+                    <VBox spacing="4" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                        <Label text="City" styleClass="field-label"/>
+                        <ComboBox fx:id="cityCombo" promptText="Select city" styleClass="form-field" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="4" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <Label text="Postal Code" styleClass="field-label"/>
+                        <TextField fx:id="postalField" styleClass="form-field"/>
+                    </VBox>
+                </GridPane>
+
+                <Label text="Shipping Info" styleClass="card-title">
+                    <padding><Insets top="14"/></padding>
+                </Label>
+
+                <HBox spacing="20">
+                    <fx:define>
+                        <ToggleGroup fx:id="addressChoiceGroup"/>
+                    </fx:define>
+                    <RadioButton fx:id="useRegisteredInfo" text="Use my registered info"
+                                 toggleGroup="$addressChoiceGroup" selected="true" onAction="#handleAddressChoice"/>
+                    <RadioButton fx:id="useDifferentInfo" text="Use different info"
+                                 toggleGroup="$addressChoiceGroup" onAction="#handleAddressChoice"/>
+                </HBox>
+
+                <Label fx:id="errorLabel" text="" styleClass="error-label"/>
+
+                <HBox spacing="10">
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Cancel"            onAction="#goBack"          styleClass="secondary-btn"/>
+                    <Button text="Continue to Payment →" onAction="#handleContinue" styleClass="primary-btn"/>
+                </HBox>
+            </VBox>
+
+            <!-- ═══ SUMMARY ═══ -->
+            <VBox styleClass="summary-panel" prefWidth="280" spacing="8">
+                <Label text="ORDER SUMMARY" styleClass="summary-title"/>
+                <Label fx:id="itemsLine"    text="Items"          styleClass="summary-line"/>
+                <Label fx:id="subtotalLine" text="Subtotal: $0.00" styleClass="summary-line"/>
+                <Label fx:id="shippingLine" text="Shipping: $0.00" styleClass="summary-line"/>
+                <Region prefHeight="10"/>
+                <Label text="TOTAL"               styleClass="summary-line"/>
+                <Label fx:id="totalLine" text="0.00" styleClass="summary-total"/>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

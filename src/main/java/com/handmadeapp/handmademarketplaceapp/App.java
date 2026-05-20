@@ -1,8 +1,13 @@
 package com.handmadeapp.handmademarketplaceapp;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -15,6 +20,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
+        primaryStage.setMaximized(true);
         loadScene("login.fxml", "SparkCraft - Login");
     }
 
@@ -42,11 +48,26 @@ public class App extends Application {
             }
 
             // Step 2 — load and display
+            boolean wasFullScreen = primaryStage.isFullScreen();
+            boolean wasMaximized = primaryStage.isMaximized();
+            double width = primaryStage.getWidth();
+            double height = primaryStage.getHeight();
+
             FXMLLoader loader = new FXMLLoader(resource);
-            Scene scene = new Scene(loader.load());
+            Parent root = loader.load();
+            tuneScrollPanes(root);
+            Scene scene = new Scene(root);
             primaryStage.setTitle(title);
             primaryStage.setScene(scene);
+            if (width > 0 && height > 0 && !wasMaximized && !wasFullScreen) {
+                primaryStage.setWidth(width);
+                primaryStage.setHeight(height);
+            }
             primaryStage.show();
+            primaryStage.setMaximized(wasMaximized);
+            if (wasFullScreen) {
+                Platform.runLater(() -> primaryStage.setFullScreen(true));
+            }
 
         } catch (Exception e) {
             // Catches IOException, NullPointerException, IllegalStateException,
@@ -54,6 +75,25 @@ public class App extends Application {
             System.err.println("[loadScene] Failed to load: " + fxmlFile);
             System.err.println("  Cause: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private static void tuneScrollPanes(Node node) {
+        if (node instanceof ScrollPane) {
+            ScrollPane scrollPane = (ScrollPane) node;
+            scrollPane.addEventFilter(ScrollEvent.SCROLL, event -> {
+                if (event.getDeltaY() == 0 || scrollPane.getContent() == null) return;
+                double contentHeight = scrollPane.getContent().getBoundsInLocal().getHeight();
+                double viewportHeight = scrollPane.getViewportBounds().getHeight();
+                double scrollableHeight = Math.max(1, contentHeight - viewportHeight);
+                scrollPane.setVvalue(scrollPane.getVvalue() - (event.getDeltaY() * 2.5 / scrollableHeight));
+                event.consume();
+            });
+        }
+        if (node instanceof Parent) {
+            for (Node child : ((Parent) node).getChildrenUnmodifiable()) {
+                tuneScrollPanes(child);
+            }
         }
     }
 

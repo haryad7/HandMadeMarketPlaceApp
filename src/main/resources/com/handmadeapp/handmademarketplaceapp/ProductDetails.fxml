@@ -62,7 +62,7 @@
                     <Label fx:id="productTitleLabel" text="Product Title" styleClass="detail-title"/>
                     <Label fx:id="shopNameLabel"     text="by Shop Name" styleClass="detail-shop"/>
                     <Separator/>
-                    <Label fx:id="priceLabel" text="$0.00" styleClass="detail-price"/>
+                    <Label fx:id="priceLabel" text="0.00" styleClass="detail-price"/>
 
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Label text="Stock:" styleClass="detail-meta-key"/>
@@ -76,10 +76,11 @@
                     <!-- Qty selector + Add to Cart -->
                     <HBox spacing="12" alignment="CENTER_LEFT">
                         <Label text="Qty:" styleClass="detail-meta-key"/>
-                        <Spinner fx:id="qtySpinner" min="1" max="99" initialValue="1"
-                                 prefWidth="80" styleClass="qty-spinner"/>
+                        <Spinner fx:id="qtySpinner" prefWidth="80" styleClass="qty-spinner"/>
                         <Button text="🛒  Add to Cart" onAction="#handleAddToCart"
                                 styleClass="add-to-cart-btn"/>
+                        <Button text="Message Seller" onAction="#handleMessageSeller"
+                                styleClass="continue-btn"/>
                     </HBox>
 
                     <Label fx:id="cartFeedbackLabel" text="" styleClass="feedback-label"/>

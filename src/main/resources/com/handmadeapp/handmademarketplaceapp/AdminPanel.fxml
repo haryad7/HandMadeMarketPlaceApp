@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="720" prefWidth="1100"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21"
+            fx:controller="com.handmadeapp.handmademarketplaceapp.AdminPanelController"
+            stylesheets="@forms.css">
+
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label text="Admin Panel"                  styleClass="topbar-title"/>
+                <Label text="Manage users and products"    styleClass="topbar-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Reports"     onAction="#openReports" styleClass="topbar-btn"/>
+            <Button text="← Dashboard" onAction="#goBack"      styleClass="topbar-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox>
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+
+                <!-- ═══ USERS TAB ═══ -->
+                <Tab text="Users">
+                    <VBox spacing="12">
+                        <padding><Insets top="14"/></padding>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="card">
+                            <Label text="Search" styleClass="field-label"/>
+                            <TextField fx:id="userSearch" promptText="Username, email…"
+                                       styleClass="form-field" prefWidth="260"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Refresh" onAction="#loadUsers" styleClass="primary-btn"/>
+                        </HBox>
+
+                        <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="uColId"     text="ID"        prefWidth="60"/>
+                                <TableColumn fx:id="uColName"   text="Name"      prefWidth="200"/>
+                                <TableColumn fx:id="uColEmail"  text="Email"     prefWidth="240"/>
+                                <TableColumn fx:id="uColRole"   text="Role"      prefWidth="100"/>
+                                <TableColumn fx:id="uColStatus" text="Status"    prefWidth="100"/>
+                                <TableColumn fx:id="uColAction" text="Actions"   prefWidth="220"/>
+                            </columns>
+                        </TableView>
+
+                        <Label fx:id="userMsg" text="" styleClass="info-label"/>
+                    </VBox>
+                </Tab>
+
+                <!-- ═══ PRODUCTS TAB ═══ -->
+                <Tab text="Products">
+                    <VBox spacing="12">
+                        <padding><Insets top="14"/></padding>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="card">
+                            <Label text="Search" styleClass="field-label"/>
+                            <TextField fx:id="productSearch" promptText="Product name…"
+                                       styleClass="form-field" prefWidth="260"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button text="Refresh" onAction="#loadProducts" styleClass="primary-btn"/>
+                        </HBox>
+
+                        <TableView fx:id="productsTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="pColId"     text="ID"      prefWidth="60"/>
+                                <TableColumn fx:id="pColName"   text="Name"    prefWidth="260"/>
+                                <TableColumn fx:id="pColShop"   text="Shop"    prefWidth="180"/>
+                                <TableColumn fx:id="pColPrice"  text="Price"   prefWidth="100"/>
+                                <TableColumn fx:id="pColStock"  text="Stock"   prefWidth="80"/>
+                                <TableColumn fx:id="pColAction" text="Actions" prefWidth="160"/>
+                            </columns>
+                        </TableView>
+
+                        <Label fx:id="productMsg" text="" styleClass="info-label"/>
+                    </VBox>
+                </Tab>
+            </TabPane>
+        </VBox>
+    </center>
+</BorderPane>

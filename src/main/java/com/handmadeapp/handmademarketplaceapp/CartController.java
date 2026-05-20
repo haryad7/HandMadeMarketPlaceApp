@@ -36,6 +36,9 @@ public class CartController implements Initializable {
     @FXML private Label totalLabel;
     @FXML private Label checkoutFeedbackLabel;
 
+    private double currentSubtotal = 0.0;
+    private int firstShopId = 0;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         User user = SessionManager.getCurrentUser();
@@ -48,9 +51,10 @@ public class CartController implements Initializable {
         cartItemsBox.getChildren().clear();
         User user = SessionManager.getCurrentUser();
         if (user == null) return;
+        ensureCartTable();
 
         String sql =
-            "SELECT c.cart_id, c.quantity, p.product_id, p.title, p.price, " +
+            "SELECT c.cart_id, c.quantity, p.product_id, p.shop_id, p.title, p.price, " +
             "       p.stock_quantity, s.name AS shop_name " +
             "FROM   cart c " +
             "JOIN   products p ON c.product_id = p.product_id " +
@@ -60,6 +64,7 @@ public class CartController implements Initializable {
 
         double subtotal = 0;
         int    itemCount = 0;
+        firstShopId = 0;
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, user.getUserId());
@@ -72,6 +77,7 @@ public class CartController implements Initializable {
                 double price    = rs.getDouble("price");
                 String title    = rs.getString("title");
                 String shop     = rs.getString("shop_name");
+                if (firstShopId == 0) firstShopId = rs.getInt("shop_id");
 
                 subtotal += price * qty;
                 cartItemsBox.getChildren().add(buildCartRow(cartId, title, shop, price, qty, maxStock));
@@ -80,6 +86,7 @@ public class CartController implements Initializable {
             System.err.println("[Cart] loadCart: " + e.getMessage());
         }
 
+        currentSubtotal = subtotal;
         itemCountLabel.setText(String.valueOf(itemCount));
         subtotalLabel.setText(String.format("$%.2f", subtotal));
         totalLabel.setText(String.format("$%.2f", subtotal));
@@ -148,6 +155,7 @@ public class CartController implements Initializable {
 
     /* ── DB helpers ───────────────────────────────────────────────── */
     private void updateCartQty(int cartId, int newQty) {
+        ensureCartTable();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                      "UPDATE cart SET quantity = ? WHERE cart_id = ?")) {
@@ -160,6 +168,7 @@ public class CartController implements Initializable {
     }
 
     private void deleteCartItem(int cartId) {
+        ensureCartTable();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
                      "DELETE FROM cart WHERE cart_id = ?")) {
@@ -172,20 +181,43 @@ public class CartController implements Initializable {
 
     /* ── Checkout placeholder ─────────────────────────────────────── */
     @FXML private void handleCheckout() {
-        checkoutFeedbackLabel.setText("Checkout flow coming soon!");
-        checkoutFeedbackLabel.setStyle("-fx-text-fill:#c47a15;-fx-font-size:12px;");
+        if (currentSubtotal <= 0) {
+            checkoutFeedbackLabel.setText("Your cart is empty.");
+            checkoutFeedbackLabel.setStyle("-fx-text-fill:#b8372a;-fx-font-size:12px;");
+            return;
+        }
+        CheckoutContext.setCartTotal(currentSubtotal);
+        CheckoutContext.setShopId(firstShopId);
+        App.loadScene("Order.fxml", "SparkCraft - Checkout");
     }
 
     /* ── Navigation ───────────────────────────────────────────────── */
     @FXML private void goBrowseProducts() { App.loadScene("ProductListing.fxml", "SparkCraft - Browse"); }
     @FXML private void goCart()           { loadCart(); /* already here */ }
-    @FXML private void goOrders()         { comingSoon("My Orders"); }
-    @FXML private void goMessages()       { comingSoon("Messages"); }
+    @FXML private void goOrders()         { App.loadScene("MyOrders.fxml", "SparkCraft - My Orders"); }
+    @FXML private void goMessages()       { App.loadScene("Messaging.fxml", "SparkCraft - Messages"); }
     @FXML private void goDashboard()      { App.loadScene("Dashboard.fxml", "SparkCraft"); }
 
     private void comingSoon(String name) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle("Coming Soon"); a.setHeaderText(name);
         a.setContentText("This screen is being built."); a.showAndWait();
+    }
+
+    static void ensureCartTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS cart ("
+                + "cart_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+                + "buyer_id INT NOT NULL, "
+                + "product_id INT NOT NULL, "
+                + "quantity INT NOT NULL DEFAULT 1, "
+                + "added_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+                + "UNIQUE KEY uq_buyer_product (buyer_id, product_id)"
+                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+        try (Connection con = DBConnection.getConnection();
+             Statement st = con.createStatement()) {
+            st.execute(sql);
+        } catch (SQLException e) {
+            System.err.println("[Cart] ensureCartTable: " + e.getMessage());
+        }
     }
 }

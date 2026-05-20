@@ -151,6 +151,17 @@ public class ProductDetailsController implements Initializable {
         User user = SessionManager.getCurrentUser();
         if (user == null) { App.loadScene("login.fxml", "SparkCraft - Login"); return; }
 
+        try {
+            if (resolveSellerUserId(currentShopId) == user.getUserId()) {
+                showFeedback("You cannot buy products from your own shop.", true);
+                return;
+            }
+        } catch (SQLException e) {
+            showFeedback("Could not verify seller ownership.", true);
+            return;
+        }
+        CartController.ensureCartTable();
+
         int qty = qtySpinner.getValue();
 
         // Check if cart item already exists → update, else insert
@@ -185,6 +196,47 @@ public class ProductDetailsController implements Initializable {
         }
     }
 
+    @FXML private void handleMessageSeller() {
+        User user = SessionManager.getCurrentUser();
+        if (user == null) {
+            App.loadScene("login.fxml", "SparkCraft - Login");
+            return;
+        }
+        if (currentShopId <= 0) {
+            showFeedback("Seller information is not available.", true);
+            return;
+        }
+
+        try {
+            int sellerId = resolveSellerUserId(currentShopId);
+            if (sellerId <= 0) {
+                showFeedback("Seller account was not found.", true);
+                return;
+            }
+            if (sellerId == user.getUserId()) {
+                showFeedback("This is your own product.", true);
+                return;
+            }
+
+            int conversationId = MessagingController.findOrCreateConversation(user.getUserId(), sellerId);
+            MessagingController.setTargetConversationId(conversationId);
+            App.loadScene("Messaging.fxml", "SparkCraft - Messages");
+        } catch (SQLException e) {
+            System.err.println("[ProductDetails] messageSeller: " + e.getMessage());
+            showFeedback("Could not start message.", true);
+        }
+    }
+
+    private int resolveSellerUserId(int shopId) throws SQLException {
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT owner_id FROM shops WHERE shop_id = ?")) {
+            ps.setInt(1, shopId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() ? rs.getInt("owner_id") : 0;
+        }
+    }
+
     private void showFeedback(String msg, boolean isError) {
         cartFeedbackLabel.setText(msg);
         cartFeedbackLabel.setStyle(isError
@@ -196,8 +248,8 @@ public class ProductDetailsController implements Initializable {
     @FXML private void goBack()          { App.loadScene("ProductListing.fxml", "SparkCraft - Browse"); }
     @FXML private void goBrowseProducts(){ App.loadScene("ProductListing.fxml", "SparkCraft - Browse"); }
     @FXML private void goCart()          { App.loadScene("Cart.fxml",           "SparkCraft - My Cart"); }
-    @FXML private void goOrders()        { comingSoon("My Orders"); }
-    @FXML private void goMessages()      { comingSoon("Messages"); }
+    @FXML private void goOrders()        { App.loadScene("MyOrders.fxml", "SparkCraft - My Orders"); }
+    @FXML private void goMessages()      { App.loadScene("Messaging.fxml", "SparkCraft - Messages"); }
 
     private void comingSoon(String name) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);

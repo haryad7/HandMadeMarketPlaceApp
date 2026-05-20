@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="700" prefWidth="1000"
+            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/21"
+            fx:controller="com.handmadeapp.handmademarketplaceapp.MessagingController"
+            stylesheets="@forms.css">
+
+    <top>
+        <HBox styleClass="topbar">
+            <VBox>
+                <Label text="Messages"                          styleClass="topbar-title"/>
+                <Label text="Buyer ↔ Seller ↔ Admin in-app chat" styleClass="topbar-sub"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Refresh"        onAction="#loadConversations" styleClass="topbar-btn"/>
+            <Button text="← Dashboard"    onAction="#goBack"            styleClass="topbar-btn"/>
+        </HBox>
+    </top>
+
+    <center>
+        <HBox>
+            <!-- ═══ CONVERSATIONS LIST ═══ -->
+            <VBox prefWidth="280" styleClass="card" style="-fx-padding: 0;">
+                <Label text="Conversations"
+                       style="-fx-padding: 16; -fx-font-weight: bold; -fx-text-fill: #1d2d6b;"/>
+                <ListView fx:id="convList" styleClass="conv-list" VBox.vgrow="ALWAYS"/>
+            </VBox>
+
+            <!-- ═══ CHAT PANE ═══ -->
+            <VBox HBox.hgrow="ALWAYS">
+                <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+                <Label fx:id="chatHeader" text="Select a conversation"
+                       styleClass="card-title">
+                    <padding><Insets bottom="8"/></padding>
+                </Label>
+
+                <ScrollPane fx:id="msgScroll" fitToWidth="true" styleClass="msg-scroll"
+                            VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox fx:id="msgList" spacing="8">
+                            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <HBox spacing="8" alignment="CENTER">
+                    <padding><Insets top="10"/></padding>
+                    <TextField fx:id="messageField"
+                               promptText="Type a message…"
+                               styleClass="form-field"
+                               HBox.hgrow="ALWAYS"/>
+                    <Button text="Send" onAction="#handleSend" styleClass="primary-btn"/>
+                </HBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

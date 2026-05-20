@@ -2,6 +2,11 @@
 .root {
     -fx-background-color: #f4f5f9;
     -fx-font-family: "Segoe UI";
+    -fx-accent: #b8372a;
+    -fx-focus-color: #b8372a;
+    -fx-faint-focus-color: rgba(184,55,42,0.12);
+    -fx-highlight-fill: #b8372a;
+    -fx-highlight-text-fill: white;
 }
 
 /* ══════════════════════════════
@@ -43,6 +48,7 @@
     -fx-padding: 60;
     -fx-spacing: 14;
     -fx-alignment: CENTER;
+    -fx-fill-width: true;
 }
 
 /* ── Heading ── */
