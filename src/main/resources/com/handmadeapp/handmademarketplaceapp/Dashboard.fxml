@@ -1,11 +1,296 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.handmadeapp.handmademarketplaceapp.DashboardController">
-    
-</AnchorPane>
+<HBox
+    prefHeight="700"
+    prefWidth="1150"
+    stylesheets="@dashboard.css"
+    xmlns="http://javafx.com/javafx"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.handmadeapp.handmademarketplaceapp.DashboardController">
+
+    <!-- ═══════════════════════════════════════════════════════
+         LEFT SIDEBAR
+    ════════════════════════════════════════════════════════ -->
+    <VBox prefWidth="240" minWidth="240" styleClass="sidebar">
+
+        <!-- Brand / Logo -->
+        <VBox styleClass="sidebar-brand" spacing="8">
+            <ImageView fitWidth="52" fitHeight="52" preserveRatio="true">
+                <image><Image url="@sparkCraftLogo.png"/></image>
+            </ImageView>
+            <Label text="SparkCraft"            styleClass="sidebar-brand-title"/>
+            <Label text="Handmade Marketplace"  styleClass="sidebar-brand-sub"/>
+        </VBox>
+
+        <Separator styleClass="sidebar-sep"/>
+
+        <!-- Logged-in user info -->
+        <VBox styleClass="sidebar-user" spacing="6">
+            <Label fx:id="userNameLabel" text="Loading..." styleClass="sidebar-user-name"/>
+            <Label fx:id="roleBadgeLabel" text="..." styleClass="role-badge"/>
+        </VBox>
+
+        <Separator styleClass="sidebar-sep"/>
+
+        <!-- ── Navigation (role sections shown/hidden by controller) ── -->
+        <VBox styleClass="nav-area" spacing="2" VBox.vgrow="ALWAYS">
+
+            <!-- BUYER NAV -->
+            <VBox fx:id="buyerSection" spacing="2">
+                <Label text="BUYER" styleClass="nav-section-label"/>
+                <Button text="  Browse Products"   onAction="#goBrowseProducts"   styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  My Cart"            onAction="#goCart"              styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  My Orders"          onAction="#goOrders"            styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Messages"           onAction="#goMessages"          styleClass="nav-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- SELLER NAV -->
+            <VBox fx:id="sellerSection" spacing="2">
+                <Label text="SELLER" styleClass="nav-section-label"/>
+                <Button text="  My Shop"            onAction="#goShop"              styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Manage Products"    onAction="#goProductManagement" styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Inventory"          onAction="#goInventory"         styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Order Management"   onAction="#goOrderManagement"   styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Messages"           onAction="#goMessages"          styleClass="nav-btn" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- ADMIN NAV -->
+            <VBox fx:id="adminSection" spacing="2">
+                <Label text="ADMIN" styleClass="nav-section-label"/>
+                <Button text="  Manage Users"       onAction="#goManageUsers"         styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Manage Products"    onAction="#goManageProductsAdmin" styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Monitor Orders"     onAction="#goMonitorOrders"       styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  View Reports"       onAction="#goReports"             styleClass="nav-btn" maxWidth="Infinity"/>
+                <Button text="  Messages"           onAction="#goMessages"            styleClass="nav-btn" maxWidth="Infinity"/>
+            </VBox>
+
+        </VBox>
+
+        <!-- Logout pinned to bottom -->
+        <VBox styleClass="sidebar-footer">
+            <Button text="Logout" onAction="#handleLogout"
+                    styleClass="logout-btn" maxWidth="Infinity"/>
+        </VBox>
+
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MAIN CONTENT
+    ════════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="main-scroll"
+                HBox.hgrow="ALWAYS">
+        <VBox styleClass="main-content" spacing="32">
+
+            <!-- Welcome header -->
+            <VBox spacing="4">
+                <Label fx:id="welcomeLabel" text="Welcome back!" styleClass="welcome-title"/>
+                <Label fx:id="dateLabel"    text=""             styleClass="welcome-date"/>
+            </VBox>
+
+            <!-- ── BUYER CARDS ── -->
+            <VBox fx:id="buyerCards" spacing="16">
+                <Label text="Quick Actions" styleClass="section-heading"/>
+                <FlowPane hgap="20" vgap="20">
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Browse Products" styleClass="card-title"/>
+                            <Label text="Discover unique handmade items from our sellers."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goBrowseProducts"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-red"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="My Cart" styleClass="card-title"/>
+                            <Label text="Review items you have added and proceed to checkout."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goCart"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="My Orders" styleClass="card-title"/>
+                            <Label text="Track your current and past orders."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goOrders"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Messages" styleClass="card-title"/>
+                            <Label text="Chat with sellers about products and orders."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goMessages"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                </FlowPane>
+            </VBox>
+
+            <!-- ── SELLER CARDS ── -->
+            <VBox fx:id="sellerCards" spacing="16">
+                <Label text="Quick Actions" styleClass="section-heading"/>
+                <FlowPane hgap="20" vgap="20">
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="My Shop" styleClass="card-title"/>
+                            <Label text="Edit your shop profile, name, and banner."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goShop"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-red"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Manage Products" styleClass="card-title"/>
+                            <Label text="Add, edit, or remove products from your shop."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goProductManagement"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Inventory" styleClass="card-title"/>
+                            <Label text="Monitor stock levels and get low-stock alerts."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goInventory"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-red"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Order Management" styleClass="card-title"/>
+                            <Label text="View and fulfill incoming orders from buyers."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goOrderManagement"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Messages" styleClass="card-title"/>
+                            <Label text="Communicate with buyers and the admin team."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goMessages"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                </FlowPane>
+            </VBox>
+
+            <!-- ── ADMIN CARDS ── -->
+            <VBox fx:id="adminCards" spacing="16">
+                <Label text="Quick Actions" styleClass="section-heading"/>
+                <FlowPane hgap="20" vgap="20">
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-red"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Manage Users" styleClass="card-title"/>
+                            <Label text="View, suspend, or remove user accounts."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goManageUsers"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Manage Products" styleClass="card-title"/>
+                            <Label text="Administer all products across the marketplace."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goManageProductsAdmin"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-red"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Monitor Orders" styleClass="card-title"/>
+                            <Label text="Oversee all orders across the entire platform."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goMonitorOrders"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="View Reports" styleClass="card-title"/>
+                            <Label text="Revenue charts, top products, and user stats."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goReports"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox styleClass="dash-card" prefWidth="210" prefHeight="165">
+                        <Region styleClass="card-stripe card-stripe-blue"/>
+                        <VBox styleClass="card-body" spacing="8" VBox.vgrow="ALWAYS">
+                            <Label text="Messages" styleClass="card-title"/>
+                            <Label text="Reply to buyer and seller support messages."
+                                   styleClass="card-desc" wrapText="true"/>
+                            <Region VBox.vgrow="ALWAYS"/>
+                            <Button text="Open" onAction="#goMessages"
+                                    styleClass="card-btn" maxWidth="Infinity"/>
+                        </VBox>
+                    </VBox>
+
+                </FlowPane>
+            </VBox>
+
+        </VBox>
+    </ScrollPane>
+
+</HBox>

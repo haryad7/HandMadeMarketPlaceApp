@@ -1,0 +1,242 @@
+/* ══════════════════════════════════════════════
+   ROOT
+══════════════════════════════════════════════ */
+.root {
+    -fx-background-color: #f4f5f9;
+    -fx-font-family: "Segoe UI";
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════ */
+.sidebar {
+    -fx-background-color: #1d2d6b;
+    -fx-min-width: 240;
+    -fx-pref-width: 240;
+}
+
+.sidebar-brand {
+    -fx-padding: 28 24 20 24;
+    -fx-spacing: 6;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.sidebar-brand-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.sidebar-brand-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #8fa3d8;
+}
+
+.sidebar-sep {
+    -fx-background-color: #2e3f7a;
+    -fx-padding: 0;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+/* ── User info block ── */
+.sidebar-user {
+    -fx-padding: 16 24 16 24;
+    -fx-spacing: 6;
+}
+
+.sidebar-user-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* ── Role badges ── */
+.role-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 10;
+    -fx-background-color: #4a5a9a;   /* fallback neutral */
+}
+
+.role-badge-buyer {
+    -fx-background-color: #1a8a5e;
+}
+
+.role-badge-seller {
+    -fx-background-color: #c47a15;
+}
+
+.role-badge-admin {
+    -fx-background-color: #b8372a;
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR NAVIGATION
+══════════════════════════════════════════════ */
+.nav-area {
+    -fx-padding: 12 8 12 8;
+    -fx-spacing: 2;
+}
+
+.nav-section-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6678b0;
+    -fx-padding: 14 12 4 12;
+    -fx-letter-spacing: 1;
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c5ceee;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 6;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #2a3d8a;
+    -fx-text-fill: white;
+}
+
+.nav-btn:pressed {
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+}
+
+/* ── Logout at bottom ── */
+.sidebar-footer {
+    -fx-padding: 12 12 20 12;
+}
+
+.logout-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8fa3d8;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12 10 12;
+    -fx-background-radius: 6;
+    -fx-border-color: #2e3f7a;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+}
+
+.logout-btn:hover {
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+    -fx-border-color: #b8372a;
+}
+
+/* ══════════════════════════════════════════════
+   MAIN SCROLL + CONTENT
+══════════════════════════════════════════════ */
+.main-scroll {
+    -fx-background-color: #f4f5f9;
+    -fx-background: #f4f5f9;
+    -fx-border-width: 0;
+}
+
+/* Remove the default ScrollPane border */
+.main-scroll > .viewport {
+    -fx-background-color: #f4f5f9;
+}
+
+.main-content {
+    -fx-padding: 40;
+    -fx-spacing: 32;
+    -fx-background-color: #f4f5f9;
+}
+
+/* ── Welcome header ── */
+.welcome-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1d2d6b;
+}
+
+.welcome-date {
+    -fx-font-size: 13px;
+    -fx-text-fill: #999;
+}
+
+/* ── Section heading above cards ── */
+.section-heading {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #444;
+}
+
+/* ══════════════════════════════════════════════
+   DASHBOARD CARDS
+══════════════════════════════════════════════ */
+.dash-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #e4e7f0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(29,45,107,0.08), 10, 0, 0, 2);
+}
+
+/* Top coloured stripe */
+.card-stripe {
+    -fx-pref-height: 5;
+    -fx-min-height: 5;
+    -fx-max-height: 5;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-radius: 10 10 0 0;
+}
+
+.card-stripe-blue {
+    -fx-background-color: #1d2d6b;
+}
+
+.card-stripe-red {
+    -fx-background-color: #b8372a;
+}
+
+/* Card body padding */
+.card-body {
+    -fx-padding: 14 16 14 16;
+    -fx-spacing: 8;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1d2d6b;
+}
+
+.card-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #888;
+    -fx-wrap-text: true;
+}
+
+.card-btn {
+    -fx-background-color: #f4f5f9;
+    -fx-text-fill: #1d2d6b;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-padding: 7 0 7 0;
+}
+
+.card-btn:hover {
+    -fx-background-color: #1d2d6b;
+    -fx-text-fill: white;
+}
+
+.card-btn:pressed {
+    -fx-background-color: #b8372a;
+    -fx-text-fill: white;
+}

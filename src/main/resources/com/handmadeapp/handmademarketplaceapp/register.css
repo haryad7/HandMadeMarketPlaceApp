@@ -7,15 +7,18 @@
 
 /* ===== LEFT PANEL (Brand) ===== */
 .left-panel {
-    -fx-background-color: #1e3a8a; /* deep navy blue */
+    -fx-background-color: #1e3a8a;
     -fx-padding: 40;
 }
 
 .logo-circle {
     -fx-background-color: white;
     -fx-background-radius: 100;
-    -fx-padding: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);
+    -fx-min-width: 180;
+    -fx-min-height: 180;
+    -fx-max-width: 180;
+    -fx-max-height: 180;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);
 }
 
 .brand-title {
@@ -32,14 +35,20 @@
 .brand-tagline {
     -fx-font-size: 13px;
     -fx-text-fill: #cbd5e1;
-    -fx-text-alignment: center;
-    -fx-wrap-text: true;
 }
 
 /* ===== RIGHT PANEL (Form) ===== */
 .right-panel {
     -fx-background-color: white;
-    -fx-padding: 50;
+    -fx-padding: 40 50 40 50;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
 }
 
 .form-title {
@@ -59,22 +68,163 @@
     -fx-text-fill: #1f2937;
 }
 
-/* ===== INPUT FIELDS ===== */
+/* ===== INPUT FIELDS (TextField, PasswordField) ===== */
 .input-field {
     -fx-background-color: #f8fafc;
     -fx-border-color: #cbd5e1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
-    -fx-padding: 10 14 10 14;
+    -fx-padding: 8 12 8 12;
     -fx-font-size: 13px;
     -fx-text-fill: #1f2937;
-    -fx-prompt-text-fill: #94a3b8;
 }
 
 .input-field:focused {
     -fx-border-color: #1e3a8a;
     -fx-background-color: white;
-    -fx-effect: dropshadow(gaussian, rgba(30,58,138,0.15), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(30,58,138,0.1), 4, 0, 0, 0);
+}
+
+/* ===== DATE PICKER — outer control ===== */
+.date-picker {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 13px;
+}
+
+.date-picker:focused {
+    -fx-border-color: #1e3a8a;
+    -fx-effect: dropshadow(gaussian, rgba(30,58,138,0.1), 4, 0, 0, 0);
+}
+
+/* Inner text field — transparent so the parent background shows */
+.date-picker > .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8 4 8 12;
+    -fx-text-fill: #1f2937;
+    -fx-prompt-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+}
+
+/* The calendar icon / arrow button */
+.date-picker > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 8 0 4;
+    -fx-cursor: hand;
+}
+
+.date-picker > .arrow-button:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4;
+}
+
+.date-picker > .arrow-button > .arrow {
+    -fx-background-color: #1e3a8a;
+    -fx-shape: "M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z";
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+    -fx-max-width: 14;
+    -fx-max-height: 14;
+}
+
+/* ===== DATE PICKER POPUP (calendar) ===== */
+.date-picker-popup {
+    -fx-background-color: white;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);
+}
+
+/* Month/year header bar */
+.date-picker-popup > * > .month-year-pane {
+    -fx-background-color: #1e3a8a;
+    -fx-padding: 8 12;
+    -fx-background-radius: 8 8 0 0;
+}
+
+/* Month and year labels in the header */
+.date-picker-popup > * > .month-year-pane .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* Back / forward arrow buttons in the header */
+.date-picker-popup > * > .month-year-pane .button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.date-picker-popup > * > .month-year-pane .button:hover {
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-background-radius: 4;
+}
+
+.date-picker-popup > * > .month-year-pane .button .left-arrow,
+.date-picker-popup > * > .month-year-pane .button .right-arrow {
+    -fx-background-color: white;
+}
+
+/* Day-of-week header row (Mon, Tue …) */
+.date-picker-popup > * > .calendar-grid .day-name-cell {
+    -fx-text-fill: #64748b;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-alignment: center;
+    -fx-padding: 6 0;
+}
+
+/* Individual day cells */
+.date-picker-popup > * > .calendar-grid .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 13px;
+    -fx-alignment: center;
+    -fx-padding: 5;
+    -fx-background-radius: 50;
+    -fx-cursor: hand;
+}
+
+.date-picker-popup > * > .calendar-grid .day-cell:hover {
+    -fx-background-color: #e0e7ff;
+    -fx-text-fill: #1e3a8a;
+}
+
+/* Today's date — outlined in navy */
+.date-picker-popup > * > .calendar-grid .today {
+    -fx-border-color: #1e3a8a;
+    -fx-border-radius: 50;
+    -fx-text-fill: #1e3a8a;
+    -fx-font-weight: bold;
+}
+
+/* Selected date — filled red to match primary button */
+.date-picker-popup > * > .calendar-grid .selected {
+    -fx-background-color: #c0392b;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup > * > .calendar-grid .selected:hover {
+    -fx-background-color: #a93226;
+}
+
+/* Disabled days (future dates, out-of-month) */
+.date-picker-popup > * > .calendar-grid .day-cell:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+
+/* "Today" / month navigation link at the bottom */
+.date-picker-popup .hyperlink {
+    -fx-text-fill: #1e3a8a;
+    -fx-underline: true;
+    -fx-font-size: 12px;
 }
 
 /* ===== COMBO BOX ===== */
@@ -83,32 +233,14 @@
     -fx-border-color: #cbd5e1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
-    -fx-padding: 2 6 2 6;
-    -fx-font-size: 13px;
+    -fx-padding: 4 8 4 8;
 }
 
-.combo-box:focused {
-    -fx-border-color: #1e3a8a;
-}
-
-.combo-box .list-cell {
-    -fx-text-fill: #1f2937;
-    -fx-padding: 6 10 6 10;
-}
-
-.combo-box-popup .list-view {
-    -fx-background-color: white;
-    -fx-border-color: #cbd5e1;
-}
-
-.combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #1e3a8a;
-    -fx-text-fill: white;
-}
+.combo-box:focused { -fx-border-color: #1e3a8a; }
 
 /* ===== PRIMARY BUTTON ===== */
 .primary-btn {
-    -fx-background-color: #c0392b; /* red like login */
+    -fx-background-color: #c0392b;
     -fx-text-fill: white;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
@@ -117,13 +249,7 @@
     -fx-cursor: hand;
 }
 
-.primary-btn:hover {
-    -fx-background-color: #a93226;
-}
-
-.primary-btn:pressed {
-    -fx-background-color: #922b21;
-}
+.primary-btn:hover { -fx-background-color: #a93226; }
 
 /* ===== LINK BUTTON ===== */
 .link-btn {
@@ -132,32 +258,12 @@
     -fx-font-weight: bold;
     -fx-underline: true;
     -fx-cursor: hand;
-    -fx-padding: 0;
 }
 
-.link-btn:hover {
-    -fx-text-fill: #c0392b;
-}
-
-/* ===== FOOTER ===== */
-.footer-label {
-    -fx-font-size: 13px;
-    -fx-text-fill: #64748b;
-}
-
-.login-separator {
-    -fx-padding: 8 0 8 0;
-}
+.link-btn:hover { -fx-text-fill: #c0392b; }
 
 /* ===== MESSAGE LABELS ===== */
-.error-label {
-    -fx-text-fill: #c0392b;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
+.error-label   { -fx-text-fill: #c0392b; -fx-font-size: 12px; }
+.success-label { -fx-text-fill: #16a34a; -fx-font-size: 12px; }
 
-.success-label {
-    -fx-text-fill: #16a34a;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
+.login-separator { -fx-padding: 10 0 10 0; }
