@@ -48,7 +48,6 @@ public class ProductManagementController implements Initializable {
 
     private int shopId        = -1;
     private int editProductId = -1;   // -1 = add mode
-    private String imageColumnName = "image_url";
 
     private final ObservableList<ProductRow> rows = FXCollections.observableArrayList();
 
@@ -58,7 +57,6 @@ public class ProductManagementController implements Initializable {
         if (user != null) userNameLabel.setText(user.getFullName());
 
         resolveShop();
-        ensureProductImageColumn();
         loadCategories();
         setupTable();
         loadProducts();
@@ -76,25 +74,6 @@ public class ProductManagementController implements Initializable {
             if (rs.next()) shopId = rs.getInt("shop_id");
         } catch (SQLException e) {
             System.err.println("[ProductMgmt] resolveShop: " + e.getMessage());
-        }
-    }
-
-    private void ensureProductImageColumn() {
-        try (Connection con = DBConnection.getConnection()) {
-            if (hasColumn(con, "products", "image_url")) {
-                imageColumnName = "image_url";
-                return;
-            }
-            if (hasColumn(con, "products", "imageUrl")) {
-                imageColumnName = "imageUrl";
-                return;
-            }
-            try (Statement st = con.createStatement()) {
-                st.executeUpdate("ALTER TABLE products ADD COLUMN image_url VARCHAR(1024) NULL");
-                imageColumnName = "image_url";
-            }
-        } catch (SQLException e) {
-            System.err.println("[ProductMgmt] image column: " + e.getMessage());
         }
     }
 
@@ -193,7 +172,11 @@ public class ProductManagementController implements Initializable {
         // Load description + image url from DB
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                     "SELECT description, category_id, " + imageColumnName + " AS image_url FROM products WHERE product_id = ?")) {
+                     "SELECT p.description, p.category_id, "
+                             + "       (SELECT pm.url FROM productmedia pm "
+                             + "        WHERE pm.product_id = p.product_id AND pm.type = 'image' "
+                             + "        ORDER BY pm.sort_order, pm.media_id LIMIT 1) AS image_url "
+                             + "FROM products p WHERE p.product_id = ?")) {
             ps.setInt(1, editProductId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -235,9 +218,8 @@ public class ProductManagementController implements Initializable {
             if (editProductId < 0) {
                 // INSERT
                 if (shopId < 0) { showFeedback("You need a shop first. Set up My Shop.", true); return; }
-                String sql = "INSERT INTO products (shop_id, category_id, title, description, price, stock_quantity, is_active, "
-                        + imageColumnName + ") VALUES (?,?,?,?,?,?,?,?)";
-                PreparedStatement ps = con.prepareStatement(sql);
+                String sql = "INSERT INTO products (shop_id, category_id, title, description, price, stock_quantity, is_active) VALUES (?,?,?,?,?,?,?)";
+                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, shopId);
                 if (categoryId > 0) ps.setInt(2, categoryId); else ps.setNull(2, Types.INTEGER);
                 ps.setString(3, title);
@@ -245,13 +227,16 @@ public class ProductManagementController implements Initializable {
                 ps.setDouble(5, price);
                 ps.setInt(6, stock);
                 ps.setBoolean(7, active);
-                ps.setString(8, imageUrl.isEmpty() ? null : imageUrl);
                 ps.executeUpdate();
+                try (ResultSet keys = ps.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        saveProductImage(con, keys.getInt(1), imageUrl);
+                    }
+                }
                 showFeedback("Product added!", false);
             } else {
                 // UPDATE
-                String sql = "UPDATE products SET category_id=?, title=?, description=?, price=?, stock_quantity=?, is_active=?, "
-                        + imageColumnName + "=? WHERE product_id=? AND shop_id=?";
+                String sql = "UPDATE products SET category_id=?, title=?, description=?, price=?, stock_quantity=?, is_active=? WHERE product_id=? AND shop_id=?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 if (categoryId > 0) ps.setInt(1, categoryId); else ps.setNull(1, Types.INTEGER);
                 ps.setString(2, title);
@@ -259,10 +244,10 @@ public class ProductManagementController implements Initializable {
                 ps.setDouble(4, price);
                 ps.setInt(5, stock);
                 ps.setBoolean(6, active);
-                ps.setString(7, imageUrl.isEmpty() ? null : imageUrl);
-                ps.setInt(8, editProductId);
-                ps.setInt(9, shopId);
+                ps.setInt(7, editProductId);
+                ps.setInt(8, shopId);
                 ps.executeUpdate();
+                saveProductImage(con, editProductId, imageUrl);
                 showFeedback("Product updated!", false);
             }
             loadProducts();
@@ -324,6 +309,40 @@ public class ProductManagementController implements Initializable {
         }
     }
 
+    private void saveProductImage(Connection con, int productId, String imageUrl) throws SQLException {
+        ensureProductMediaTable(con);
+        try (PreparedStatement clear = con.prepareStatement(
+                "DELETE FROM productmedia WHERE product_id = ? AND type = 'image' AND sort_order = 0")) {
+            clear.setInt(1, productId);
+            clear.executeUpdate();
+        }
+
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            return;
+        }
+
+        try (PreparedStatement insert = con.prepareStatement(
+                "INSERT INTO productmedia (product_id, url, type, sort_order) VALUES (?, ?, 'image', 0)")) {
+            insert.setInt(1, productId);
+            insert.setString(2, imageUrl.trim());
+            insert.executeUpdate();
+        }
+    }
+
+    private void ensureProductMediaTable(Connection con) throws SQLException {
+        if (hasTable(con, "productmedia")) return;
+        try (Statement st = con.createStatement()) {
+            st.executeUpdate(
+                    "CREATE TABLE productmedia ("
+                            + "media_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+                            + "product_id INT NOT NULL, "
+                            + "url VARCHAR(1024) NOT NULL, "
+                            + "type ENUM('image','video') DEFAULT 'image', "
+                            + "sort_order INT DEFAULT 0"
+                            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        }
+    }
+
     @FXML private void handleAddNew() { handleClear(); formTitleLabel.setText("Add Product"); }
 
     @FXML private void handleClear() {
@@ -349,6 +368,16 @@ public class ProductManagementController implements Initializable {
             if (rs.next()) return true;
         }
         try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
+        }
+    }
+
+    private boolean hasTable(Connection con, String tableName) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        try (ResultSet rs = metaData.getTables(con.getCatalog(), null, tableName, null)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getTables(con.getCatalog(), null, tableName.toUpperCase(), null)) {
             return rs.next();
         }
     }

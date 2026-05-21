@@ -60,10 +60,12 @@ public class ProductDetailsController implements Initializable {
     private void loadProduct() {
         String imageSelect = "NULL AS image_url";
         try (Connection con = DBConnection.getConnection()) {
-            if (hasColumn(con, "products", "image_url")) {
+            if (hasTable(con, "productmedia")) {
+                imageSelect = "(SELECT pm.url FROM productmedia pm "
+                        + "WHERE pm.product_id = p.product_id AND pm.type = 'image' "
+                        + "ORDER BY pm.sort_order, pm.media_id LIMIT 1) AS image_url";
+            } else if (hasColumn(con, "products", "image_url")) {
                 imageSelect = "p.image_url AS image_url";
-            } else if (hasColumn(con, "products", "imageUrl")) {
-                imageSelect = "p.imageUrl AS image_url";
             }
         } catch (SQLException e) {
             System.err.println("[ProductDetails] image column: " + e.getMessage());
@@ -273,6 +275,16 @@ public class ProductDetailsController implements Initializable {
             if (rs.next()) return true;
         }
         try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
+        }
+    }
+
+    private boolean hasTable(Connection con, String tableName) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        try (ResultSet rs = metaData.getTables(con.getCatalog(), null, tableName, null)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getTables(con.getCatalog(), null, tableName.toUpperCase(), null)) {
             return rs.next();
         }
     }

@@ -169,6 +169,7 @@ public class AdminPanelController {
         Connection c = null;
         try {
             c = DBConnection.getConnection();
+            ensureUsersArchiveCompatible(c);
             c.setAutoCommit(false);
 
             int uid = row.getId();
@@ -202,6 +203,9 @@ public class AdminPanelController {
                             + "LEFT JOIN shops sh ON o.shop_id = sh.shop_id "
                             + "WHERE o.buyer_id = ? OR sh.owner_id = ?",
                     uid, uid);
+            execIfTable(c, "orderstatushistory",
+                    "UPDATE orderstatushistory SET changed_by = NULL WHERE changed_by = ?",
+                    uid);
             execIfTable(c, "orders",
                     "DELETE o FROM orders o "
                             + "LEFT JOIN shops sh ON o.shop_id = sh.shop_id "
@@ -213,6 +217,11 @@ public class AdminPanelController {
                             + "LEFT JOIN shops sh ON p.shop_id = sh.shop_id "
                             + "WHERE pr.buyer_id = ? OR sh.owner_id = ?",
                     uid, uid);
+            execIfTable(c, "sellerreviews",
+                    "DELETE sr FROM sellerreviews sr "
+                            + "LEFT JOIN shops sh ON sr.shop_id = sh.shop_id "
+                            + "WHERE sr.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
             execIfTable(c, "products",
                     "DELETE p FROM products p JOIN shops sh ON p.shop_id = sh.shop_id WHERE sh.owner_id = ?",
                     uid);
@@ -222,7 +231,7 @@ public class AdminPanelController {
             execIfTable(c, "addresses",
                     "DELETE FROM addresses WHERE user_id = ?",
                     uid);
-            exec(c, "DELETE FROM users WHERE user_id = ?", uid);
+            deleteUserRow(c, uid);
 
             c.commit();
             userMsg.setText("Deleted user #" + row.getId());
@@ -314,6 +323,16 @@ public class AdminPanelController {
         }
     }
 
+    private boolean hasColumn(Connection c, String tableName, String columnName) throws SQLException {
+        DatabaseMetaData metaData = c.getMetaData();
+        try (ResultSet rs = metaData.getColumns(c.getCatalog(), null, tableName, columnName)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getColumns(c.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
+        }
+    }
+
     private void execIfTable(Connection c, String tableName, String sql, int... ids) throws SQLException {
         if (hasTable(c, tableName)) {
             exec(c, sql, ids);
@@ -326,6 +345,35 @@ public class AdminPanelController {
                 ps.setInt(i + 1, ids[i]);
             }
             ps.executeUpdate();
+        }
+    }
+
+    private void deleteUserRow(Connection c, int uid) throws SQLException {
+        try {
+            exec(c, "DELETE FROM users WHERE user_id = ?", uid);
+        } catch (SQLException ex) {
+            String message = ex.getMessage() == null ? "" : ex.getMessage().toLowerCase();
+            if (message.contains("full_name") || message.contains("deleted_at") || message.contains("role")) {
+                ensureUsersArchiveCompatible(c);
+                exec(c, "DELETE FROM users WHERE user_id = ?", uid);
+                return;
+            }
+            throw ex;
+        }
+    }
+
+    private void ensureUsersArchiveCompatible(Connection c) throws SQLException {
+        if (!hasTable(c, "users_archive")) return;
+        addColumnIfMissing(c, "users_archive", "full_name", "VARCHAR(255) NULL");
+        addColumnIfMissing(c, "users_archive", "role", "VARCHAR(50) NULL");
+        addColumnIfMissing(c, "users_archive", "deleted_at", "TIMESTAMP NULL DEFAULT NULL");
+    }
+
+    private void addColumnIfMissing(Connection c, String tableName, String columnName, String definition) throws SQLException {
+        if (!hasColumn(c, tableName, columnName)) {
+            try (Statement st = c.createStatement()) {
+                st.executeUpdate("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + definition);
+            }
         }
     }
 
