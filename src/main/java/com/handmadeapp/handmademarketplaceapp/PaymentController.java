@@ -20,6 +20,18 @@ import java.util.UUID;
  */
 public class PaymentController {
 
+    private static final class CartItem {
+        private final int productId;
+        private final int quantity;
+        private final double price;
+
+        private CartItem(int productId, int quantity, double price) {
+            this.productId = productId;
+            this.quantity = quantity;
+            this.price = price;
+        }
+    }
+
     @FXML private ComboBox<String> methodBox;
     @FXML private TextField cardholderField, cardNumberField;
     @FXML private ComboBox<Integer> expMonthBox, expYearBox;
@@ -142,6 +154,20 @@ public class PaymentController {
         String selectSql = "SELECT c.product_id, c.quantity, p.price "
                 + "FROM cart c JOIN products p ON c.product_id = p.product_id "
                 + "WHERE c.buyer_id = ?";
+        List<CartItem> items = new ArrayList<>();
+        try (PreparedStatement select = con.prepareStatement(selectSql)) {
+            select.setInt(1, userId);
+            try (ResultSet rs = select.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new CartItem(
+                            rs.getInt("product_id"),
+                            rs.getInt("quantity"),
+                            rs.getDouble("price")));
+                }
+            }
+        }
+        if (items.isEmpty()) return 0;
+
         Set<String> columns = getTableColumns(con, "orderitems");
         String priceColumn = columns.contains("unit_price") ? "unit_price"
                 : columns.contains("price") ? "price"
@@ -161,26 +187,32 @@ public class PaymentController {
         String insertSql = "INSERT INTO orderitems (" + String.join(", ", insertColumns) + ") VALUES ("
                 + "?,".repeat(insertColumns.size()).replaceAll(",$", "") + ")";
 
-        int count = 0;
-        try (PreparedStatement select = con.prepareStatement(selectSql);
-             PreparedStatement insert = con.prepareStatement(insertSql)) {
-            select.setInt(1, userId);
-            ResultSet rs = select.executeQuery();
-            while (rs.next()) {
-                int qty = rs.getInt("quantity");
-                double price = rs.getDouble("price");
+        try (PreparedStatement insert = con.prepareStatement(insertSql)) {
+            for (CartItem item : items) {
                 int idx = 1;
                 insert.setInt(idx++, orderId);
-                insert.setInt(idx++, rs.getInt("product_id"));
-                insert.setInt(idx++, qty);
-                if (priceColumn != null) insert.setDouble(idx++, price);
-                if (subtotalColumn != null) insert.setDouble(idx++, price * qty);
+                insert.setInt(idx++, item.productId);
+                insert.setInt(idx++, item.quantity);
+                if (priceColumn != null) insert.setDouble(idx++, item.price);
+                if (subtotalColumn != null) insert.setDouble(idx++, item.price * item.quantity);
                 insert.addBatch();
-                count++;
             }
-            if (count > 0) insert.executeBatch();
+            insert.executeBatch();
         }
-        return count;
+
+        String stockSql = "UPDATE products "
+                + "SET stock_quantity = GREATEST(0, stock_quantity - ?) "
+                + "WHERE product_id = ?";
+        try (PreparedStatement updateStock = con.prepareStatement(stockSql)) {
+            for (CartItem item : items) {
+                updateStock.setInt(1, item.quantity);
+                updateStock.setInt(2, item.productId);
+                updateStock.addBatch();
+            }
+            updateStock.executeBatch();
+        }
+
+        return items.size();
     }
 
     private int createPayment(Connection con, int orderId, double total, String method,

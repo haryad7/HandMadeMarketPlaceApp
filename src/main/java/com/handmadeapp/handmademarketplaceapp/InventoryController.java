@@ -85,6 +85,8 @@ public class InventoryController implements Initializable {
     }
 
     private void setupTable() {
+        inventoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         colId.setCellValueFactory(new PropertyValueFactory<>("productId"));
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colCat.setCellValueFactory(new PropertyValueFactory<>("categoryName"));

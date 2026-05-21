@@ -53,8 +53,9 @@
 
                 <!-- Image placeholder -->
                 <VBox styleClass="img-panel" alignment="CENTER" prefWidth="340" prefHeight="300">
+                    <ImageView fx:id="productImageView" fitWidth="320" fitHeight="280" preserveRatio="true" visible="false" managed="false"/>
                     <Label fx:id="imgPlaceholderLabel" text="📦" styleClass="img-placeholder-icon"/>
-                    <Label text="No image available" styleClass="img-placeholder-text"/>
+                    <Label fx:id="imgPlaceholderTextLabel" text="No image available" styleClass="img-placeholder-text"/>
                 </VBox>
 
                 <!-- Right info -->

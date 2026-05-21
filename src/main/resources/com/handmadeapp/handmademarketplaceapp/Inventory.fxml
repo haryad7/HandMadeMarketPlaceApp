@@ -76,12 +76,12 @@
         <!-- Inventory table -->
         <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS" styleClass="data-table">
             <columns>
-                <TableColumn fx:id="colId"     text="ID"      prefWidth="55"/>
-                <TableColumn fx:id="colTitle"  text="Product" prefWidth="260"/>
-                <TableColumn fx:id="colCat"    text="Category" prefWidth="140"/>
-                <TableColumn fx:id="colStock"  text="Stock"   prefWidth="80"/>
-                <TableColumn fx:id="colStatus" text="Status"  prefWidth="110"/>
-                <TableColumn fx:id="colEdit"   text="Update"  prefWidth="120"/>
+                <TableColumn fx:id="colId"     text="ID"       minWidth="55"/>
+                <TableColumn fx:id="colTitle"  text="Product"  minWidth="220"/>
+                <TableColumn fx:id="colCat"    text="Category" minWidth="130"/>
+                <TableColumn fx:id="colStock"  text="Stock"    minWidth="80"/>
+                <TableColumn fx:id="colStatus" text="Status"   minWidth="110"/>
+                <TableColumn fx:id="colEdit"   text="Update"   minWidth="120"/>
             </columns>
             <placeholder>
                 <Label text="No products found." styleClass="table-empty-label"/>

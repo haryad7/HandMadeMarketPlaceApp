@@ -54,13 +54,13 @@
             <VBox HBox.hgrow="ALWAYS" spacing="0">
                 <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="data-table">
                     <columns>
-                        <TableColumn fx:id="colId"       text="ID"       prefWidth="55"/>
-                        <TableColumn fx:id="colTitle"    text="Title"    prefWidth="220"/>
-                        <TableColumn fx:id="colCategory" text="Category" prefWidth="140"/>
-                        <TableColumn fx:id="colPrice"    text="Price"    prefWidth="90"/>
-                        <TableColumn fx:id="colStock"    text="Stock"    prefWidth="70"/>
-                        <TableColumn fx:id="colActive"   text="Active"   prefWidth="70"/>
-                        <TableColumn fx:id="colActions"  text="Actions"  prefWidth="120"/>
+                        <TableColumn fx:id="colId"       text="ID"       minWidth="55"/>
+                        <TableColumn fx:id="colTitle"    text="Title"    minWidth="180"/>
+                        <TableColumn fx:id="colCategory" text="Category" minWidth="130"/>
+                        <TableColumn fx:id="colPrice"    text="Price"    minWidth="80"/>
+                        <TableColumn fx:id="colStock"    text="Stock"    minWidth="70"/>
+                        <TableColumn fx:id="colActive"   text="Active"   minWidth="70"/>
+                        <TableColumn fx:id="colActions"  text="Actions"  minWidth="120"/>
                     </columns>
                     <placeholder>
                         <Label text="No products yet. Click '+ Add New Product' to start." styleClass="table-empty-label"/>
@@ -78,6 +78,7 @@
                         <Label text="Title *" styleClass="field-label"/>
                         <TextField fx:id="titleField" promptText="Product title"
                                    styleClass="login-field" maxWidth="Infinity"/>
+                        <Button text="Browse Image" onAction="#handleChooseImage" styleClass="topbar-btn"/>
                     </VBox>
 
                     <VBox spacing="6">

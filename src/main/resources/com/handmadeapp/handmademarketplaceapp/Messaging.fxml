@@ -35,6 +35,11 @@
             <VBox prefWidth="280" styleClass="card" style="-fx-padding: 0;">
                 <Label text="Conversations"
                        style="-fx-padding: 16; -fx-font-weight: bold; -fx-text-fill: #1d2d6b;"/>
+                <Button text="+ New Message" onAction="#openNewMessageDialog"
+                        styleClass="primary-btn"
+                        maxWidth="Infinity">
+                    <VBox.margin><Insets top="0" right="16" bottom="10" left="16"/></VBox.margin>
+                </Button>
                 <ListView fx:id="convList" styleClass="conv-list" VBox.vgrow="ALWAYS"/>
             </VBox>
 

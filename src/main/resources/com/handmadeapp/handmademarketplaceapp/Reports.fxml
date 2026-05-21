@@ -73,15 +73,16 @@
 
             <!-- ═══ TABLE ═══ -->
             <VBox styleClass="card" spacing="8" VBox.vgrow="ALWAYS">
-                <Label text="Recent Orders" styleClass="card-title"/>
-                <TableView fx:id="recentTable" prefHeight="360" VBox.vgrow="ALWAYS">
+                <Label text="Shop Performance" styleClass="card-title"/>
+                <TableView fx:id="shopStatsTable" prefHeight="360" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="rColId"     text="Order #" prefWidth="80"/>
-                        <TableColumn fx:id="rColBuyer"  text="Buyer"   prefWidth="200"/>
-                        <TableColumn fx:id="rColShop"   text="Shop"    prefWidth="200"/>
-                        <TableColumn fx:id="rColTotal"  text="Total"   prefWidth="120"/>
-                        <TableColumn fx:id="rColStatus" text="Status"  prefWidth="120"/>
-                        <TableColumn fx:id="rColDate"   text="Date"    prefWidth="180"/>
+                        <TableColumn fx:id="sColShop"     text="Shop"            minWidth="180"/>
+                        <TableColumn fx:id="sColRevenue"  text="Revenue"         minWidth="110"/>
+                        <TableColumn fx:id="sColOrders"   text="Orders"          minWidth="80"/>
+                        <TableColumn fx:id="sColAvgOrder" text="Avg Order Value" minWidth="130"/>
+                        <TableColumn fx:id="sColItems"    text="Items Sold"      minWidth="100"/>
+                        <TableColumn fx:id="sColPending"  text="Pending Orders"  minWidth="120"/>
+                        <TableColumn fx:id="sColStatus"   text="Shop Status"     minWidth="110"/>
                     </columns>
                 </TableView>
             </VBox>

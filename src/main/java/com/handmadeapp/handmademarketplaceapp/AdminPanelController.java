@@ -68,6 +68,9 @@ public class AdminPanelController {
     @FXML
     public void initialize() {
         // ── USERS COLUMNS
+        usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        productsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         uColId    .setCellValueFactory(new PropertyValueFactory<>("id"));
         uColName  .setCellValueFactory(new PropertyValueFactory<>("name"));
         uColEmail .setCellValueFactory(new PropertyValueFactory<>("email"));
@@ -160,16 +163,77 @@ public class AdminPanelController {
     }
 
     private void deleteUser(UserRow row) {
-        if (!confirm("Delete user #" + row.getId() + " (" + row.getName() + ")?")) return;
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "DELETE FROM users WHERE user_id = ?")) {
-            ps.setInt(1, row.getId());
-            ps.executeUpdate();
+        if (!confirm("Delete user #" + row.getId() + " (" + row.getName() + ")?\n"
+                + "This will also delete their orders, messages, and shop data.")) return;
+
+        Connection c = null;
+        try {
+            c = DBConnection.getConnection();
+            c.setAutoCommit(false);
+
+            int uid = row.getId();
+
+            execIfTable(c, "messages",
+                    "DELETE m FROM messages m "
+                            + "JOIN conversations cv ON m.conversation_id = cv.conversation_id "
+                            + "WHERE cv.buyer_id = ? OR cv.seller_id = ?",
+                    uid, uid);
+            execIfTable(c, "messages",
+                    "DELETE FROM messages WHERE sender_id = ?",
+                    uid);
+            execIfTable(c, "conversations",
+                    "DELETE FROM conversations WHERE buyer_id = ? OR seller_id = ?",
+                    uid, uid);
+            execIfTable(c, "cart",
+                    "DELETE c FROM cart c "
+                            + "LEFT JOIN products p ON c.product_id = p.product_id "
+                            + "LEFT JOIN shops sh ON p.shop_id = sh.shop_id "
+                            + "WHERE c.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
+            execIfTable(c, "payments",
+                    "DELETE p FROM payments p "
+                            + "JOIN orders o ON p.order_id = o.order_id "
+                            + "LEFT JOIN shops sh ON o.shop_id = sh.shop_id "
+                            + "WHERE o.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
+            execIfTable(c, "orderitems",
+                    "DELETE oi FROM orderitems oi "
+                            + "JOIN orders o ON oi.order_id = o.order_id "
+                            + "LEFT JOIN shops sh ON o.shop_id = sh.shop_id "
+                            + "WHERE o.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
+            execIfTable(c, "orders",
+                    "DELETE o FROM orders o "
+                            + "LEFT JOIN shops sh ON o.shop_id = sh.shop_id "
+                            + "WHERE o.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
+            execIfTable(c, "productreviews",
+                    "DELETE pr FROM productreviews pr "
+                            + "LEFT JOIN products p ON pr.product_id = p.product_id "
+                            + "LEFT JOIN shops sh ON p.shop_id = sh.shop_id "
+                            + "WHERE pr.buyer_id = ? OR sh.owner_id = ?",
+                    uid, uid);
+            execIfTable(c, "products",
+                    "DELETE p FROM products p JOIN shops sh ON p.shop_id = sh.shop_id WHERE sh.owner_id = ?",
+                    uid);
+            execIfTable(c, "shops",
+                    "DELETE FROM shops WHERE owner_id = ?",
+                    uid);
+            execIfTable(c, "addresses",
+                    "DELETE FROM addresses WHERE user_id = ?",
+                    uid);
+            exec(c, "DELETE FROM users WHERE user_id = ?", uid);
+
+            c.commit();
             userMsg.setText("Deleted user #" + row.getId());
             loadUsers();
         } catch (SQLException ex) {
+            try { if (c != null) c.rollback(); } catch (SQLException ignored) {}
             userMsg.setText("Error: " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
+            try { if (c != null) c.setAutoCommit(true); } catch (SQLException ignored) {}
+            try { if (c != null) c.close(); } catch (SQLException ignored) {}
         }
     }
 
@@ -247,6 +311,31 @@ public class AdminPanelController {
             return rs.next();
         } catch (SQLException e) {
             return false;
+        }
+    }
+
+    private void execIfTable(Connection c, String tableName, String sql, int... ids) throws SQLException {
+        if (hasTable(c, tableName)) {
+            exec(c, sql, ids);
+        }
+    }
+
+    private void exec(Connection c, String sql, int... ids) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            for (int i = 0; i < ids.length; i++) {
+                ps.setInt(i + 1, ids[i]);
+            }
+            ps.executeUpdate();
+        }
+    }
+
+    private boolean hasTable(Connection c, String tableName) throws SQLException {
+        DatabaseMetaData metaData = c.getMetaData();
+        try (ResultSet rs = metaData.getTables(c.getCatalog(), null, tableName, null)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getTables(c.getCatalog(), null, tableName.toUpperCase(), null)) {
+            return rs.next();
         }
     }
 }

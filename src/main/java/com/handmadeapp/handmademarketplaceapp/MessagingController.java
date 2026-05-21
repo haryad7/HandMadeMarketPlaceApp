@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -43,10 +44,14 @@ public class MessagingController {
         ensureMessagingTables();
         try (Connection con = DBConnection.getConnection()) {
             String findSql = "SELECT conversation_id FROM conversations "
-                    + "WHERE buyer_id = ? AND seller_id = ? LIMIT 1";
+                    + "WHERE (buyer_id = ? AND seller_id = ?) "
+                    + "   OR (buyer_id = ? AND seller_id = ?) "
+                    + "LIMIT 1";
             try (PreparedStatement find = con.prepareStatement(findSql)) {
                 find.setInt(1, buyerId);
                 find.setInt(2, sellerId);
+                find.setInt(3, sellerId);
+                find.setInt(4, buyerId);
                 ResultSet rs = find.executeQuery();
                 if (rs.next()) return rs.getInt("conversation_id");
             }
@@ -72,6 +77,80 @@ public class MessagingController {
             }
         });
         loadConversations();
+    }
+
+    @FXML
+    private void openNewMessageDialog() {
+        User me = SessionManager.getCurrentUser();
+        if (me == null) return;
+
+        Dialog<Integer> dialog = new Dialog<>();
+        dialog.setTitle("New Conversation");
+        dialog.setHeaderText("Search for a user to message");
+
+        TextField searchBox = new TextField();
+        searchBox.setPromptText("Type username or name...");
+
+        ListView<String[]> resultList = new ListView<>();
+        resultList.setPrefHeight(220);
+        resultList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(String[] item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item[1]);
+            }
+        });
+
+        searchBox.textProperty().addListener((obs, oldValue, newValue) -> {
+            resultList.getItems().clear();
+            if (newValue == null || newValue.trim().length() < 2) return;
+
+            String query = "%" + newValue.trim() + "%";
+            String sql = "SELECT user_id, CONCAT(first_name,' ',last_name) AS name, username "
+                    + "FROM users "
+                    + "WHERE (username LIKE ? OR CONCAT(first_name,' ',last_name) LIKE ?) "
+                    + "AND user_id != ? "
+                    + "ORDER BY first_name, last_name "
+                    + "LIMIT 10";
+            try (Connection c = DBConnection.getConnection();
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setString(1, query);
+                ps.setString(2, query);
+                ps.setInt(3, me.getUserId());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String name = rs.getString("name");
+                        String username = rs.getString("username");
+                        resultList.getItems().add(new String[] {
+                                String.valueOf(rs.getInt("user_id")),
+                                name + " (@" + username + ")"
+                        });
+                    }
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        VBox content = new VBox(8, searchBox, resultList);
+        content.setPadding(new Insets(12));
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setResultConverter(button -> {
+            if (button != ButtonType.OK) return null;
+            String[] selected = resultList.getSelectionModel().getSelectedItem();
+            return selected == null ? null : Integer.parseInt(selected[0]);
+        });
+
+        dialog.showAndWait().ifPresent(targetUserId -> {
+            try {
+                int conversationId = findOrCreateConversation(me.getUserId(), targetUserId);
+                setTargetConversationId(conversationId);
+                loadConversations();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     @FXML

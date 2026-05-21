@@ -7,8 +7,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.util.ResourceBundle;
 
@@ -42,6 +48,7 @@ public class ProductManagementController implements Initializable {
 
     private int shopId        = -1;
     private int editProductId = -1;   // -1 = add mode
+    private String imageColumnName = "image_url";
 
     private final ObservableList<ProductRow> rows = FXCollections.observableArrayList();
 
@@ -51,6 +58,7 @@ public class ProductManagementController implements Initializable {
         if (user != null) userNameLabel.setText(user.getFullName());
 
         resolveShop();
+        ensureProductImageColumn();
         loadCategories();
         setupTable();
         loadProducts();
@@ -71,6 +79,25 @@ public class ProductManagementController implements Initializable {
         }
     }
 
+    private void ensureProductImageColumn() {
+        try (Connection con = DBConnection.getConnection()) {
+            if (hasColumn(con, "products", "image_url")) {
+                imageColumnName = "image_url";
+                return;
+            }
+            if (hasColumn(con, "products", "imageUrl")) {
+                imageColumnName = "imageUrl";
+                return;
+            }
+            try (Statement st = con.createStatement()) {
+                st.executeUpdate("ALTER TABLE products ADD COLUMN image_url VARCHAR(1024) NULL");
+                imageColumnName = "image_url";
+            }
+        } catch (SQLException e) {
+            System.err.println("[ProductMgmt] image column: " + e.getMessage());
+        }
+    }
+
     /* ── Load categories ──────────────────────────────────────────── */
     private void loadCategories() {
         categoryCombo.getItems().add("— None —");
@@ -88,6 +115,8 @@ public class ProductManagementController implements Initializable {
 
     /* ── Setup table columns ──────────────────────────────────────── */
     private void setupTable() {
+        productsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         colId.setCellValueFactory(new PropertyValueFactory<>("productId"));
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
         colCategory.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
@@ -164,11 +193,12 @@ public class ProductManagementController implements Initializable {
         // Load description + image url from DB
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(
-                     "SELECT description, category_id FROM products WHERE product_id = ?")) {
+                     "SELECT description, category_id, " + imageColumnName + " AS image_url FROM products WHERE product_id = ?")) {
             ps.setInt(1, editProductId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 descField.setText(rs.getString("description") != null ? rs.getString("description") : "");
+                imageUrlField.setText(rs.getString("image_url") != null ? rs.getString("image_url") : "");
                 int catId = rs.getInt("category_id");
                 categoryCombo.getItems().stream()
                         .filter(s -> s.contains("|" + catId))
@@ -198,13 +228,15 @@ public class ProductManagementController implements Initializable {
 
         int categoryId = parseCategoryId();
         String desc    = descField.getText().trim();
+        String imageUrl = imageUrlField.getText().trim();
         boolean active = activeCheck.isSelected();
 
         try (Connection con = DBConnection.getConnection()) {
             if (editProductId < 0) {
                 // INSERT
                 if (shopId < 0) { showFeedback("You need a shop first. Set up My Shop.", true); return; }
-                String sql = "INSERT INTO products (shop_id, category_id, title, description, price, stock_quantity, is_active) VALUES (?,?,?,?,?,?,?)";
+                String sql = "INSERT INTO products (shop_id, category_id, title, description, price, stock_quantity, is_active, "
+                        + imageColumnName + ") VALUES (?,?,?,?,?,?,?,?)";
                 PreparedStatement ps = con.prepareStatement(sql);
                 ps.setInt(1, shopId);
                 if (categoryId > 0) ps.setInt(2, categoryId); else ps.setNull(2, Types.INTEGER);
@@ -213,11 +245,13 @@ public class ProductManagementController implements Initializable {
                 ps.setDouble(5, price);
                 ps.setInt(6, stock);
                 ps.setBoolean(7, active);
+                ps.setString(8, imageUrl.isEmpty() ? null : imageUrl);
                 ps.executeUpdate();
                 showFeedback("Product added!", false);
             } else {
                 // UPDATE
-                String sql = "UPDATE products SET category_id=?, title=?, description=?, price=?, stock_quantity=?, is_active=? WHERE product_id=? AND shop_id=?";
+                String sql = "UPDATE products SET category_id=?, title=?, description=?, price=?, stock_quantity=?, is_active=?, "
+                        + imageColumnName + "=? WHERE product_id=? AND shop_id=?";
                 PreparedStatement ps = con.prepareStatement(sql);
                 if (categoryId > 0) ps.setInt(1, categoryId); else ps.setNull(1, Types.INTEGER);
                 ps.setString(2, title);
@@ -225,8 +259,9 @@ public class ProductManagementController implements Initializable {
                 ps.setDouble(4, price);
                 ps.setInt(5, stock);
                 ps.setBoolean(6, active);
-                ps.setInt(7, editProductId);
-                ps.setInt(8, shopId);
+                ps.setString(7, imageUrl.isEmpty() ? null : imageUrl);
+                ps.setInt(8, editProductId);
+                ps.setInt(9, shopId);
                 ps.executeUpdate();
                 showFeedback("Product updated!", false);
             }
@@ -259,6 +294,36 @@ public class ProductManagementController implements Initializable {
         });
     }
 
+    @FXML
+    private void handleChooseImage() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choose Product Image");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                "Image files", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp"));
+
+        File selected = chooser.showOpenDialog(imageUrlField.getScene().getWindow());
+        if (selected == null) return;
+
+        try {
+            Path imageDir = Path.of(System.getProperty("user.home"), ".sparkcraft", "product-images");
+            Files.createDirectories(imageDir);
+
+            String originalName = selected.getName();
+            String extension = "";
+            int dot = originalName.lastIndexOf('.');
+            if (dot >= 0) extension = originalName.substring(dot).toLowerCase();
+
+            String fileName = "product-" + System.currentTimeMillis() + extension;
+            Path target = imageDir.resolve(fileName);
+            Files.copy(selected.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
+
+            imageUrlField.setText(target.toUri().toString());
+            showFeedback("Image selected. Save the product to keep it.", false);
+        } catch (IOException e) {
+            showFeedback("Could not copy image: " + e.getMessage(), true);
+        }
+    }
+
     @FXML private void handleAddNew() { handleClear(); formTitleLabel.setText("Add Product"); }
 
     @FXML private void handleClear() {
@@ -276,6 +341,16 @@ public class ProductManagementController implements Initializable {
         if (sel == null || !sel.contains("|")) return -1;
         try { return Integer.parseInt(sel.split("\\|")[1]); }
         catch (Exception e) { return -1; }
+    }
+
+    private boolean hasColumn(Connection con, String tableName, String columnName) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName, columnName)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
+        }
     }
 
     private void showFeedback(String msg, boolean isError) {

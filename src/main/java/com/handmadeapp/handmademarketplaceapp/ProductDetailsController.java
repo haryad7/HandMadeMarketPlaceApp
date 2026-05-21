@@ -4,6 +4,8 @@ import com.handmadeapp.handmademarketplaceapp.DB.DBConnection;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 import java.net.URL;
@@ -30,6 +32,9 @@ public class ProductDetailsController implements Initializable {
     @FXML private Label descriptionLabel;
     @FXML private Label avgRatingLabel;
     @FXML private Label cartFeedbackLabel;
+    @FXML private Label imgPlaceholderLabel;
+    @FXML private Label imgPlaceholderTextLabel;
+    @FXML private ImageView productImageView;
     @FXML private Spinner<Integer> qtySpinner;
     @FXML private VBox  reviewsBox;
 
@@ -53,9 +58,20 @@ public class ProductDetailsController implements Initializable {
 
     /* ── Load product info ────────────────────────────────────────── */
     private void loadProduct() {
+        String imageSelect = "NULL AS image_url";
+        try (Connection con = DBConnection.getConnection()) {
+            if (hasColumn(con, "products", "image_url")) {
+                imageSelect = "p.image_url AS image_url";
+            } else if (hasColumn(con, "products", "imageUrl")) {
+                imageSelect = "p.imageUrl AS image_url";
+            }
+        } catch (SQLException e) {
+            System.err.println("[ProductDetails] image column: " + e.getMessage());
+        }
+
         String sql =
             "SELECT p.product_id, p.title, p.description, p.price, p.stock_quantity, " +
-            "       p.shop_id, c.name AS category_name, s.name AS shop_name " +
+            "       p.shop_id, c.name AS category_name, s.name AS shop_name, " + imageSelect + " " +
             "FROM   products p " +
             "LEFT JOIN categories c ON p.category_id = c.category_id " +
             "LEFT JOIN shops      s ON p.shop_id      = s.shop_id " +
@@ -78,6 +94,7 @@ public class ProductDetailsController implements Initializable {
                         ? rs.getString("category_name") : "—");
                 descriptionLabel.setText(rs.getString("description") != null
                         ? rs.getString("description") : "No description provided.");
+                showProductImage(rs.getString("image_url"));
 
                 // Configure spinner max
                 SpinnerValueFactory.IntegerSpinnerValueFactory svf =
@@ -89,6 +106,19 @@ public class ProductDetailsController implements Initializable {
         } catch (SQLException e) {
             System.err.println("[ProductDetails] loadProduct: " + e.getMessage());
         }
+    }
+
+    private void showProductImage(String imageUrl) {
+        boolean hasImage = imageUrl != null && !imageUrl.trim().isEmpty();
+        if (hasImage) {
+            productImageView.setImage(new Image(imageUrl, true));
+        }
+        productImageView.setVisible(hasImage);
+        productImageView.setManaged(hasImage);
+        imgPlaceholderLabel.setVisible(!hasImage);
+        imgPlaceholderLabel.setManaged(!hasImage);
+        imgPlaceholderTextLabel.setVisible(!hasImage);
+        imgPlaceholderTextLabel.setManaged(!hasImage);
     }
 
     /* ── Load reviews ─────────────────────────────────────────────── */
@@ -234,6 +264,16 @@ public class ProductDetailsController implements Initializable {
             ps.setInt(1, shopId);
             ResultSet rs = ps.executeQuery();
             return rs.next() ? rs.getInt("owner_id") : 0;
+        }
+    }
+
+    private boolean hasColumn(Connection con, String tableName, String columnName) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName, columnName)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
         }
     }
 

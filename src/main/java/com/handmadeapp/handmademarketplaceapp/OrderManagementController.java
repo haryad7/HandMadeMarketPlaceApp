@@ -23,18 +23,20 @@ public class OrderManagementController {
         private final int    orderId;
         private final String buyer;
         private final String seller;
+        private final String shop;
         private final double total;
         private final String date;
         private final String status;
         private final String address;
-        public OrderRow(int orderId, String buyer, String seller, double total,
+        public OrderRow(int orderId, String buyer, String seller, String shop, double total,
                         String date, String status, String address) {
-            this.orderId = orderId; this.buyer = buyer; this.seller = seller; this.total = total;
+            this.orderId = orderId; this.buyer = buyer; this.seller = seller; this.shop = shop; this.total = total;
             this.date = date; this.status = status; this.address = address;
         }
         public int    getOrderId() { return orderId; }
         public String getBuyer()   { return buyer; }
         public String getSeller()  { return seller; }
+        public String getShop()    { return shop; }
         public double getTotal()   { return total; }
         public String getDate()    { return date; }
         public String getStatus()  { return status; }
@@ -45,15 +47,18 @@ public class OrderManagementController {
     @FXML private ComboBox<String>    statusFilter, newStatusBox;
     @FXML private TableView<OrderRow> ordersTable;
     @FXML private TableColumn<OrderRow, Integer> colId;
-    @FXML private TableColumn<OrderRow, String>  colBuyer, colSeller, colDate, colStatus, colAddress;
+    @FXML private TableColumn<OrderRow, String>  colBuyer, colSeller, colShop, colDate, colStatus, colAddress;
     @FXML private TableColumn<OrderRow, Double>  colTotal;
     @FXML private Label statusMsg;
 
     @FXML
     public void initialize() {
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         colId     .setCellValueFactory(new PropertyValueFactory<>("orderId"));
         colBuyer  .setCellValueFactory(new PropertyValueFactory<>("buyer"));
         if (colSeller != null) colSeller.setCellValueFactory(new PropertyValueFactory<>("seller"));
+        if (colShop != null) colShop.setCellValueFactory(new PropertyValueFactory<>("shop"));
         colTotal  .setCellValueFactory(new PropertyValueFactory<>("total"));
         colDate   .setCellValueFactory(new PropertyValueFactory<>("date"));
         colStatus .setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -89,6 +94,7 @@ public class OrderManagementController {
             "SELECT o.order_id, o.total_amount, o.order_date, o.status, " +
             "       CONCAT(u.first_name,' ',u.last_name) AS buyer, " +
             "       CONCAT(su.first_name,' ',su.last_name) AS seller, " +
+            "       s.name AS shop, " +
             "       CONCAT(IFNULL(a.address_line1,''), ', ', IFNULL(a.city,'')) AS addr " +
             "FROM orders o " +
             "JOIN users u  ON o.buyer_id = u.user_id " +
@@ -105,7 +111,8 @@ public class OrderManagementController {
         if (!search.isEmpty()) sql.append(
                 "AND (CAST(o.order_id AS CHAR) LIKE ? " +
                 "  OR CONCAT(u.first_name,' ',u.last_name) LIKE ? " +
-                "  OR CONCAT(su.first_name,' ',su.last_name) LIKE ?) "
+                "  OR CONCAT(su.first_name,' ',su.last_name) LIKE ? " +
+                "  OR s.name LIKE ?) "
         );
 
         sql.append("ORDER BY o.order_date DESC");
@@ -119,6 +126,7 @@ public class OrderManagementController {
                 ps.setString(idx++, "%" + search + "%");
                 ps.setString(idx++, "%" + search + "%");
                 ps.setString(idx++, "%" + search + "%");
+                ps.setString(idx++, "%" + search + "%");
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -126,6 +134,7 @@ public class OrderManagementController {
                             rs.getInt   ("order_id"),
                             rs.getString("buyer"),
                             rs.getString("seller"),
+                            rs.getString("shop"),
                             rs.getDouble("total_amount"),
                             String.valueOf(rs.getTimestamp("order_date")),
                             rs.getString("status"),

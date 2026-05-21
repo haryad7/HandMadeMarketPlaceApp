@@ -4,6 +4,8 @@ import com.handmadeapp.handmademarketplaceapp.DB.DBConnection;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import java.net.URL;
@@ -56,10 +58,20 @@ public class ProductListingController implements Initializable {
     /* ── Load / refresh product cards ─────────────────────────────── */
     private void loadProducts(String keyword, int categoryId) {
         productGrid.getChildren().clear();
+        String imageSelect = "NULL AS image_url";
+        try (Connection con = DBConnection.getConnection()) {
+            if (hasColumn(con, "products", "image_url")) {
+                imageSelect = "p.image_url AS image_url";
+            } else if (hasColumn(con, "products", "imageUrl")) {
+                imageSelect = "p.imageUrl AS image_url";
+            }
+        } catch (SQLException e) {
+            System.err.println("[ProductListing] image column: " + e.getMessage());
+        }
 
         StringBuilder sql = new StringBuilder(
             "SELECT p.product_id, p.title, p.price, p.stock_quantity, " +
-            "       c.name AS category_name, s.name AS shop_name, s.owner_id AS seller_id " +
+            "       c.name AS category_name, s.name AS shop_name, s.owner_id AS seller_id, " + imageSelect + " " +
             "FROM   products p " +
             "LEFT JOIN categories c ON p.category_id = c.category_id " +
             "LEFT JOIN shops      s ON p.shop_id      = s.shop_id " +
@@ -87,7 +99,8 @@ public class ProductListingController implements Initializable {
                     rs.getString("category_name"),
                     rs.getDouble("price"),
                     rs.getInt("stock_quantity"),
-                    rs.getInt("seller_id")
+                    rs.getInt("seller_id"),
+                    rs.getString("image_url")
                 ));
             }
         } catch (SQLException e) {
@@ -99,11 +112,19 @@ public class ProductListingController implements Initializable {
 
     /* ── Build a single product card VBox ─────────────────────────── */
     private VBox buildProductCard(int productId, String title, String shopName,
-                                   String category, double price, int stock, int sellerId) {
+                                   String category, double price, int stock, int sellerId, String imageUrl) {
         VBox card = new VBox(8);
         card.getStyleClass().add("product-card");
         card.setPrefWidth(200);
         card.setStyle("-fx-padding: 16;");
+
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            ImageView image = new ImageView(new Image(imageUrl, true));
+            image.setFitWidth(168);
+            image.setFitHeight(120);
+            image.setPreserveRatio(true);
+            card.getChildren().add(image);
+        }
 
         // Category badge
         Label catLabel = new Label(category != null ? category : "Uncategorized");
@@ -236,5 +257,15 @@ public class ProductListingController implements Initializable {
     private boolean isOwnProduct(int sellerId) {
         User user = SessionManager.getCurrentUser();
         return user != null && sellerId == user.getUserId();
+    }
+
+    private boolean hasColumn(Connection con, String tableName, String columnName) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName, columnName)) {
+            if (rs.next()) return true;
+        }
+        try (ResultSet rs = metaData.getColumns(con.getCatalog(), null, tableName.toUpperCase(), columnName)) {
+            return rs.next();
+        }
     }
 }

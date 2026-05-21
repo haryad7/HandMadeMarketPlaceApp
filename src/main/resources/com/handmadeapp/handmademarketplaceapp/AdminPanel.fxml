@@ -52,12 +52,12 @@
 
                         <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="uColId"     text="ID"        prefWidth="60"/>
-                                <TableColumn fx:id="uColName"   text="Name"      prefWidth="200"/>
-                                <TableColumn fx:id="uColEmail"  text="Email"     prefWidth="240"/>
-                                <TableColumn fx:id="uColRole"   text="Role"      prefWidth="100"/>
-                                <TableColumn fx:id="uColStatus" text="Status"    prefWidth="100"/>
-                                <TableColumn fx:id="uColAction" text="Actions"   prefWidth="120"/>
+                                <TableColumn fx:id="uColId"     text="ID"        minWidth="60"/>
+                                <TableColumn fx:id="uColName"   text="Name"      minWidth="160"/>
+                                <TableColumn fx:id="uColEmail"  text="Email"     minWidth="200"/>
+                                <TableColumn fx:id="uColRole"   text="Role"      minWidth="90"/>
+                                <TableColumn fx:id="uColStatus" text="Status"    minWidth="90"/>
+                                <TableColumn fx:id="uColAction" text="Actions"   minWidth="110"/>
                             </columns>
                         </TableView>
 
@@ -80,12 +80,12 @@
 
                         <TableView fx:id="productsTable" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="pColId"     text="ID"      prefWidth="60"/>
-                                <TableColumn fx:id="pColName"   text="Name"    prefWidth="260"/>
-                                <TableColumn fx:id="pColShop"   text="Shop"    prefWidth="180"/>
-                                <TableColumn fx:id="pColPrice"  text="Price"   prefWidth="100"/>
-                                <TableColumn fx:id="pColStock"  text="Stock"   prefWidth="80"/>
-                                <TableColumn fx:id="pColAction" text="Actions" prefWidth="160"/>
+                                <TableColumn fx:id="pColId"     text="ID"      minWidth="60"/>
+                                <TableColumn fx:id="pColName"   text="Name"    minWidth="180"/>
+                                <TableColumn fx:id="pColShop"   text="Shop"    minWidth="150"/>
+                                <TableColumn fx:id="pColPrice"  text="Price"   minWidth="90"/>
+                                <TableColumn fx:id="pColStock"  text="Stock"   minWidth="80"/>
+                                <TableColumn fx:id="pColAction" text="Actions" minWidth="130"/>
                             </columns>
                         </TableView>
 

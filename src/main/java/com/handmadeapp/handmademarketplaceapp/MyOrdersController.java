@@ -52,6 +52,8 @@ public class MyOrdersController {
 
     @FXML
     public void initialize() {
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         colId.setCellValueFactory(new PropertyValueFactory<>("orderId"));
         colShop.setCellValueFactory(new PropertyValueFactory<>("shop"));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));

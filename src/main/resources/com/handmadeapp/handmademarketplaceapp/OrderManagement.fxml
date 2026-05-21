@@ -48,13 +48,14 @@
             <!-- ═══ ORDERS TABLE ═══ -->
             <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colId"      text="Order #"   prefWidth="80"/>
-                    <TableColumn fx:id="colBuyer"   text="Buyer"     prefWidth="180"/>
-                    <TableColumn fx:id="colSeller"  text="Seller"    prefWidth="180"/>
-                    <TableColumn fx:id="colTotal"   text="Total"     prefWidth="100"/>
-                    <TableColumn fx:id="colDate"    text="Date"      prefWidth="160"/>
-                    <TableColumn fx:id="colStatus"  text="Status"    prefWidth="120"/>
-                    <TableColumn fx:id="colAddress" text="Ship To"   prefWidth="220"/>
+                    <TableColumn fx:id="colId"      text="Order #"   minWidth="80"/>
+                    <TableColumn fx:id="colBuyer"   text="Buyer"     minWidth="150"/>
+                    <TableColumn fx:id="colSeller"  text="Seller"    minWidth="150"/>
+                    <TableColumn fx:id="colShop"    text="Shop"      minWidth="160"/>
+                    <TableColumn fx:id="colTotal"   text="Total"     minWidth="90"/>
+                    <TableColumn fx:id="colDate"    text="Date"      minWidth="150"/>
+                    <TableColumn fx:id="colStatus"  text="Status"    minWidth="110"/>
+                    <TableColumn fx:id="colAddress" text="Ship To"   minWidth="200"/>
                 </columns>
             </TableView>
 

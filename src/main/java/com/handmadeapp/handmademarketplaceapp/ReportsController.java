@@ -12,25 +12,37 @@ import java.sql.*;
 
 /**
  * Admin reports: stat tiles + bar chart (revenue per shop)
- * + pie chart (orders by status) + recent orders table.
+ * + pie chart (orders by status) + shop performance table.
  */
 public class ReportsController {
 
-    public static class RecentRow {
-        private final int    orderId;
-        private final String buyer, shop, status, date;
-        private final double total;
-        public RecentRow(int orderId, String buyer, String shop,
-                         double total, String status, String date) {
-            this.orderId = orderId; this.buyer = buyer; this.shop = shop;
-            this.total = total; this.status = status; this.date = date;
+    public static class ShopStatRow {
+        private final String shop;
+        private final String status;
+        private final double revenue;
+        private final double avgOrder;
+        private final int orders;
+        private final int itemsSold;
+        private final int pending;
+
+        public ShopStatRow(String shop, double revenue, int orders,
+                           double avgOrder, int itemsSold, int pending, String status) {
+            this.shop = shop;
+            this.revenue = revenue;
+            this.orders = orders;
+            this.avgOrder = avgOrder;
+            this.itemsSold = itemsSold;
+            this.pending = pending;
+            this.status = status;
         }
-        public int    getOrderId() { return orderId; }
-        public String getBuyer()   { return buyer; }
-        public String getShop()    { return shop; }
-        public double getTotal()   { return total; }
-        public String getStatus()  { return status; }
-        public String getDate()    { return date; }
+
+        public String getShop()     { return shop; }
+        public double getRevenue()  { return revenue; }
+        public int    getOrders()   { return orders; }
+        public double getAvgOrder() { return avgOrder; }
+        public int    getItemsSold(){ return itemsSold; }
+        public int    getPending()  { return pending; }
+        public String getStatus()   { return status; }
     }
 
     @FXML private Label     revenueLabel, ordersLabel, paidLabel, usersLabel;
@@ -38,26 +50,36 @@ public class ReportsController {
     @FXML private CategoryAxis revenueX;
     @FXML private NumberAxis   revenueY;
     @FXML private PieChart    statusChart;
-    @FXML private TableView<RecentRow> recentTable;
-    @FXML private TableColumn<RecentRow, Integer> rColId;
-    @FXML private TableColumn<RecentRow, String>  rColBuyer, rColShop, rColStatus, rColDate;
-    @FXML private TableColumn<RecentRow, Double>  rColTotal;
+    @FXML private TableView<ShopStatRow> shopStatsTable;
+    @FXML private TableColumn<ShopStatRow, String>  sColShop, sColStatus;
+    @FXML private TableColumn<ShopStatRow, Double>  sColRevenue, sColAvgOrder;
+    @FXML private TableColumn<ShopStatRow, Integer> sColOrders, sColItems, sColPending;
 
     @FXML
     public void initialize() {
-        rColId    .setCellValueFactory(new PropertyValueFactory<>("orderId"));
-        rColBuyer .setCellValueFactory(new PropertyValueFactory<>("buyer"));
-        rColShop  .setCellValueFactory(new PropertyValueFactory<>("shop"));
-        rColTotal .setCellValueFactory(new PropertyValueFactory<>("total"));
-        rColStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        rColDate  .setCellValueFactory(new PropertyValueFactory<>("date"));
-        rColTotal.setCellFactory(c -> new TableCell<>() {
+        shopStatsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        sColShop    .setCellValueFactory(new PropertyValueFactory<>("shop"));
+        sColRevenue .setCellValueFactory(new PropertyValueFactory<>("revenue"));
+        sColOrders  .setCellValueFactory(new PropertyValueFactory<>("orders"));
+        sColAvgOrder.setCellValueFactory(new PropertyValueFactory<>("avgOrder"));
+        sColItems   .setCellValueFactory(new PropertyValueFactory<>("itemsSold"));
+        sColPending .setCellValueFactory(new PropertyValueFactory<>("pending"));
+        sColStatus  .setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        sColRevenue.setCellFactory(c -> currencyCell());
+        sColAvgOrder.setCellFactory(c -> currencyCell());
+
+        loadAll();
+    }
+
+    private TableCell<ShopStatRow, Double> currencyCell() {
+        return new TableCell<>() {
             @Override protected void updateItem(Double v, boolean empty) {
                 super.updateItem(v, empty);
-                setText(empty || v == null ? "" : String.format("$%.2f", v));
+                setText(empty || v == null ? "" : String.format("$%,.2f", v));
             }
-        });
-        loadAll();
+        };
     }
 
     @FXML
@@ -111,26 +133,33 @@ public class ReportsController {
             statusChart.setData(pie);
 
             // ── Recent orders table
-            ObservableList<RecentRow> rows = FXCollections.observableArrayList();
+            ObservableList<ShopStatRow> rows = FXCollections.observableArrayList();
             try (Statement s = c.createStatement();
                  ResultSet rs = s.executeQuery(
-                         "SELECT o.order_id, CONCAT(u.first_name,' ',u.last_name) AS buyer, " +
-                         "       sh.name AS shop, o.total_amount, o.status, o.order_date " +
-                         "FROM orders o " +
-                         "JOIN users u  ON o.buyer_id = u.user_id " +
-                         "JOIN shops sh ON o.shop_id = sh.shop_id " +
-                         "ORDER BY o.order_date DESC LIMIT 25")) {
+                         "SELECT sh.name AS shop, sh.status, " +
+                         "  COALESCE(SUM(CASE WHEN o.status IN ('paid','shipped','completed') THEN o.total_amount END), 0) AS revenue, " +
+                         "  COUNT(DISTINCT o.order_id) AS orders_total, " +
+                         "  COALESCE(AVG(CASE WHEN o.status IN ('paid','shipped','completed') THEN o.total_amount END), 0) AS avg_order, " +
+                         "  COALESCE(SUM(CASE WHEN o.status IN ('paid','shipped','completed') THEN oi.quantity END), 0) AS items_sold, " +
+                         "  COUNT(DISTINCT CASE WHEN o.status = 'pending' THEN o.order_id END) AS pending_count " +
+                         "FROM shops sh " +
+                         "LEFT JOIN orders o ON sh.shop_id = o.shop_id " +
+                         "LEFT JOIN orderitems oi ON o.order_id = oi.order_id " +
+                         "GROUP BY sh.shop_id, sh.name, sh.status " +
+                         "ORDER BY revenue DESC")) {
                 while (rs.next()) {
-                    rows.add(new RecentRow(
-                            rs.getInt("order_id"),
-                            rs.getString("buyer"),
+                    rows.add(new ShopStatRow(
                             rs.getString("shop"),
-                            rs.getDouble("total_amount"),
-                            rs.getString("status"),
-                            String.valueOf(rs.getTimestamp("order_date"))));
+                            rs.getDouble("revenue"),
+                            rs.getInt("orders_total"),
+                            rs.getDouble("avg_order"),
+                            rs.getInt("items_sold"),
+                            rs.getInt("pending_count"),
+                            rs.getString("status")
+                    ));
                 }
             }
-            recentTable.setItems(rows);
+            shopStatsTable.setItems(rows);
 
         } catch (SQLException ex) {
             ex.printStackTrace();
