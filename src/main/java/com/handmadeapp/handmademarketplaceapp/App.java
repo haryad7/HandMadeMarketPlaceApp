@@ -2,11 +2,15 @@ package com.handmadeapp.handmademarketplaceapp;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventTarget;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
 
@@ -16,15 +20,12 @@ import java.net.URL;
 public class App extends Application {
 
     private static Stage primaryStage;
+    private static double dragOffsetX;
+    private static double dragOffsetY;
 
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
-        primaryStage.maximizedProperty().addListener((obs, wasMaximized, isMaximized) -> {
-            if (!isMaximized) {
-                Platform.runLater(() -> primaryStage.setMaximized(true));
-            }
-        });
         primaryStage.setMaximized(true);
         loadScene("login.fxml", "SparkCraft - Login");
     }
@@ -53,21 +54,21 @@ public class App extends Application {
             }
 
             // Step 2 — load and display
-            boolean wasFullScreen = primaryStage.isFullScreen();
+            StageState stageState = StageState.capture(primaryStage);
 
             FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
             tuneScrollPanes(root);
-            Scene scene = new Scene(root);
+            installWindowDragHandlers(root);
+
+            Scene scene = stageState.hasScene
+                    ? new Scene(root, stageState.width, stageState.height)
+                    : new Scene(root);
+
             primaryStage.setTitle(title);
             primaryStage.setScene(scene);
             primaryStage.show();
-            primaryStage.setMaximized(true);
-            if (wasFullScreen) {
-                Platform.runLater(() -> primaryStage.setFullScreen(true));
-            } else {
-                Platform.runLater(() -> primaryStage.setMaximized(true));
-            }
+            Platform.runLater(() -> stageState.restore(primaryStage));
 
         } catch (Exception e) {
             // Catches IOException, NullPointerException, IllegalStateException,
@@ -94,6 +95,86 @@ public class App extends Application {
             for (Node child : ((Parent) node).getChildrenUnmodifiable()) {
                 tuneScrollPanes(child);
             }
+        }
+    }
+
+    private static void installWindowDragHandlers(Node node) {
+        if (node.getStyleClass().contains("topbar")) {
+            node.setOnMousePressed(event -> {
+                if (event.getButton() != MouseButton.PRIMARY || isWindowDragBlocked(event.getTarget())) {
+                    return;
+                }
+                dragOffsetX = event.getScreenX() - primaryStage.getX();
+                dragOffsetY = event.getScreenY() - primaryStage.getY();
+            });
+            node.setOnMouseDragged(event -> {
+                if (event.getButton() != MouseButton.PRIMARY || isWindowDragBlocked(event.getTarget())) {
+                    return;
+                }
+                primaryStage.setX(event.getScreenX() - dragOffsetX);
+                primaryStage.setY(event.getScreenY() - dragOffsetY);
+            });
+        }
+        if (node instanceof Parent) {
+            for (Node child : ((Parent) node).getChildrenUnmodifiable()) {
+                installWindowDragHandlers(child);
+            }
+        }
+    }
+
+    private static boolean isWindowDragBlocked(EventTarget target) {
+        if (primaryStage.isMaximized() || primaryStage.isFullScreen()) {
+            return true;
+        }
+        if (!(target instanceof Node)) {
+            return false;
+        }
+
+        Node node = (Node) target;
+        while (node != null && !node.getStyleClass().contains("topbar")) {
+            if (node instanceof ButtonBase || node instanceof TextInputControl) {
+                return true;
+            }
+            node = node.getParent();
+        }
+        return false;
+    }
+
+    private static final class StageState {
+        private final boolean hasScene;
+        private final boolean maximized;
+        private final boolean fullScreen;
+        private final boolean iconified;
+        private final double x;
+        private final double y;
+        private final double width;
+        private final double height;
+
+        private StageState(Stage stage) {
+            hasScene = stage.getScene() != null;
+            maximized = stage.isMaximized();
+            fullScreen = stage.isFullScreen();
+            iconified = stage.isIconified();
+            x = stage.getX();
+            y = stage.getY();
+            width = Math.max(1, stage.getWidth());
+            height = Math.max(1, stage.getHeight());
+        }
+
+        private static StageState capture(Stage stage) {
+            return new StageState(stage);
+        }
+
+        private void restore(Stage stage) {
+            if (!maximized && !fullScreen) {
+                stage.setX(x);
+                stage.setY(y);
+                stage.setWidth(width);
+                stage.setHeight(height);
+            }
+            stage.setMaximized(maximized);
+            stage.setFullScreen(fullScreen);
+            stage.setIconified(iconified);
         }
     }
 

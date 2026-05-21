@@ -11,22 +11,6 @@ import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
 
-/**
- * Controller for Cart.fxml
- * Lists cart items with quantity controls and shows live subtotal.
- *
- * IMPORTANT – run this SQL once to create the cart table if it does not exist:
- * <pre>
- * CREATE TABLE IF NOT EXISTS `cart` (
- *   `cart_id`    INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
- *   `buyer_id`   INT          NOT NULL,
- *   `product_id` INT          NOT NULL,
- *   `quantity`   INT          NOT NULL DEFAULT 1,
- *   `added_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
- *   UNIQUE KEY `uq_buyer_product` (`buyer_id`, `product_id`)
- * ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
- * </pre>
- */
 public class CartController implements Initializable {
 
     @FXML private Label userNameLabel;

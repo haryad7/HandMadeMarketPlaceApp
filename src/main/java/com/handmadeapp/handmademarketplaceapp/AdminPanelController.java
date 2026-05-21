@@ -10,11 +10,7 @@ import javafx.scene.layout.HBox;
 
 import java.sql.*;
 
-/**
- * Admin only: manage users (ban / unban) and products (delete).
- * Uses an `is_active` column on `users` if present; if not, falls
- * back to setting the role to 'banned'.
- */
+
 public class AdminPanelController {
 
     /* ─── User row model ─── */
