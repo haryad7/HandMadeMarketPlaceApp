@@ -48,6 +48,13 @@ public class AdminPanelController {
 
     @FXML private TextField userSearch, productSearch;
     @FXML private Label     userMsg, productMsg;
+    @FXML private TabPane   adminTabs;
+
+    private static String initialTab = "users";
+
+    public static void setInitialTab(String tab) {
+        initialTab = tab == null ? "users" : tab;
+    }
 
     /* USERS */
     @FXML private TableView<UserRow>             usersTable;
@@ -71,16 +78,10 @@ public class AdminPanelController {
         uColRole  .setCellValueFactory(new PropertyValueFactory<>("role"));
         uColStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         uColAction.setCellFactory(col -> new TableCell<>() {
-            private final Button ban    = new Button("Ban");
-            private final Button unban  = new Button("Unban");
             private final Button del    = new Button("Delete");
-            private final HBox box      = new HBox(6, ban, unban, del);
+            private final HBox box      = new HBox(6, del);
             {
-                ban  .getStyleClass().add("danger-btn");
-                unban.getStyleClass().add("subtle-btn");
                 del  .getStyleClass().add("danger-btn");
-                ban  .setOnAction(e -> setUserActive(getCurrentRow(), false));
-                unban.setOnAction(e -> setUserActive(getCurrentRow(), true));
                 del  .setOnAction(e -> deleteUser  (getCurrentRow()));
             }
             private UserRow getCurrentRow() {
@@ -117,6 +118,12 @@ public class AdminPanelController {
 
         loadUsers();
         loadProducts();
+        if ("products".equalsIgnoreCase(initialTab)) {
+            adminTabs.getSelectionModel().select(1);
+        } else {
+            adminTabs.getSelectionModel().select(0);
+        }
+        initialTab = "users";
     }
 
     /* ────────── USERS ────────── */
@@ -124,8 +131,9 @@ public class AdminPanelController {
     public void loadUsers() {
         ObservableList<UserRow> rows = FXCollections.observableArrayList();
         String q = userSearch.getText() == null ? "" : userSearch.getText().trim();
+        boolean hasActiveColumn = hasColumn("users", "is_active");
         String sql = "SELECT user_id, CONCAT(first_name,' ',last_name) AS name, " +
-                     "email, role, COALESCE(is_active,1) AS active " +
+                     "email, role" + (hasActiveColumn ? ", COALESCE(is_active,1) AS active " : " ") +
                      "FROM users " +
                      (q.isEmpty() ? "" : "WHERE username LIKE ? OR email LIKE ? OR first_name LIKE ? ") +
                      "ORDER BY user_id";
@@ -143,27 +151,15 @@ public class AdminPanelController {
                             rs.getString("name"),
                             rs.getString("email"),
                             rs.getString("role"),
-                            rs.getInt("active") == 1 ? "active" : "banned"));
+                            hasActiveColumn
+                                    ? (rs.getInt("active") == 1 ? "active" : "banned")
+                                    : ("banned".equalsIgnoreCase(rs.getString("role")) ? "banned" : "active")));
                 }
             }
             usersTable.setItems(rows);
             userMsg.setText(rows.size() + " user(s)");
         } catch (SQLException ex) {
             userMsg.setText("Error: " + ex.getMessage());
-        }
-    }
-
-    private void setUserActive(UserRow row, boolean active) {
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "UPDATE users SET is_active = ? WHERE user_id = ?")) {
-            ps.setInt(1, active ? 1 : 0);
-            ps.setInt(2, row.getId());
-            ps.executeUpdate();
-            userMsg.setText("User #" + row.getId() + (active ? " unbanned." : " banned."));
-            loadUsers();
-        } catch (SQLException ex) {
-            userMsg.setText("Tip: add `is_active TINYINT DEFAULT 1` to users. " + ex.getMessage());
         }
     }
 
@@ -186,9 +182,9 @@ public class AdminPanelController {
     public void loadProducts() {
         ObservableList<ProductRow> rows = FXCollections.observableArrayList();
         String q = productSearch.getText() == null ? "" : productSearch.getText().trim();
-        String sql = "SELECT p.product_id, p.name, s.name AS shop, p.price, p.stock " +
+        String sql = "SELECT p.product_id, p.title, s.name AS shop, p.price, p.stock_quantity " +
                      "FROM products p LEFT JOIN shops s ON p.shop_id = s.shop_id " +
-                     (q.isEmpty() ? "" : "WHERE p.name LIKE ? ") +
+                     (q.isEmpty() ? "" : "WHERE p.title LIKE ? ") +
                      "ORDER BY p.product_id";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -197,10 +193,10 @@ public class AdminPanelController {
                 while (rs.next()) {
                     rows.add(new ProductRow(
                             rs.getInt("product_id"),
-                            rs.getString("name"),
+                            rs.getString("title"),
                             rs.getString("shop"),
                             rs.getDouble("price"),
-                            rs.getInt("stock")));
+                            rs.getInt("stock_quantity")));
                 }
             }
             productsTable.setItems(rows);
@@ -212,11 +208,17 @@ public class AdminPanelController {
 
     private void deleteProduct(ProductRow row) {
         if (!confirm("Delete product #" + row.getId() + " (" + row.getName() + ")?")) return;
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "DELETE FROM products WHERE product_id = ?")) {
-            ps.setInt(1, row.getId());
-            ps.executeUpdate();
+        try (Connection c = DBConnection.getConnection()) {
+            c.setAutoCommit(false);
+            deleteByProductId(c, "cart", row.getId());
+            deleteByProductId(c, "productreviews", row.getId());
+            deleteByProductId(c, "orderitems", row.getId());
+            try (PreparedStatement ps = c.prepareStatement(
+                    "DELETE FROM products WHERE product_id = ?")) {
+                ps.setInt(1, row.getId());
+                ps.executeUpdate();
+            }
+            c.commit();
             productMsg.setText("Deleted product #" + row.getId());
             loadProducts();
         } catch (SQLException ex) {
@@ -233,4 +235,22 @@ public class AdminPanelController {
 
     @FXML private void openReports() { App.loadScene("Reports.fxml",   "Admin — Reports"); }
     @FXML private void goBack()      { App.loadScene("Dashboard.fxml", "Dashboard"); }
+    private void deleteByProductId(Connection c, String tableName, int productId) {
+        try (PreparedStatement ps = c.prepareStatement(
+                "DELETE FROM " + tableName + " WHERE product_id = ?")) {
+            ps.setInt(1, productId);
+            ps.executeUpdate();
+        } catch (SQLException ignored) {
+            // Some schemas may not have all dependent tables yet.
+        }
+    }
+
+    private boolean hasColumn(String tableName, String columnName) {
+        try (Connection c = DBConnection.getConnection();
+             ResultSet rs = c.getMetaData().getColumns(c.getCatalog(), null, tableName, columnName)) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 }

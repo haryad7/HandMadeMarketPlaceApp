@@ -37,7 +37,7 @@
             <!-- ═══ FILTER BAR ═══ -->
             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="card">
                 <Label text="Search"   styleClass="field-label"/>
-                <TextField fx:id="searchField" promptText="Order # or buyer name"
+                <TextField fx:id="searchField" promptText="Order #, buyer, or seller"
                            styleClass="form-field" prefWidth="240"/>
                 <Label text="Status"   styleClass="field-label"/>
                 <ComboBox fx:id="statusFilter" styleClass="form-field" prefWidth="160"/>
@@ -50,6 +50,7 @@
                 <columns>
                     <TableColumn fx:id="colId"      text="Order #"   prefWidth="80"/>
                     <TableColumn fx:id="colBuyer"   text="Buyer"     prefWidth="180"/>
+                    <TableColumn fx:id="colSeller"  text="Seller"    prefWidth="180"/>
                     <TableColumn fx:id="colTotal"   text="Total"     prefWidth="100"/>
                     <TableColumn fx:id="colDate"    text="Date"      prefWidth="160"/>
                     <TableColumn fx:id="colStatus"  text="Status"    prefWidth="120"/>

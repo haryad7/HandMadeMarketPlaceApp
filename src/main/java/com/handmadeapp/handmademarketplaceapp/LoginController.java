@@ -23,7 +23,7 @@ public class LoginController {
 
 //    
     public void initialize(URL url, ResourceBundle rb) {
-
+        ensureDefaultAdminAccount();
     }
 
     @FXML
@@ -54,10 +54,9 @@ public class LoginController {
 
             if (rs.next()) {
                 // Fix PHP BCrypt $2y$ → $2a$
-                String dbHash = rs.getString("password_hash")
-                        .replace("$2y$", "$2a$");
+                String dbHash = normalizeBCryptHash(rs.getString("password_hash"));
 
-                if (BCrypt.checkpw(password, dbHash)) {
+                if (dbHash != null && BCrypt.checkpw(password, dbHash)) {
                     User user = new User(
                             rs.getInt("user_id"),
                             rs.getString("username"),
@@ -76,6 +75,9 @@ public class LoginController {
                 errorLabel.setText(" No account found with that username, email, or phone.");
             }
 
+        } catch (IllegalArgumentException e) {
+            errorLabel.setText("Invalid saved password hash for this account.");
+            System.err.println("[Login] Invalid password hash: " + e.getMessage());
         } catch (SQLException e) {
             errorLabel.setText("Database error: " + e.getMessage());
         }
@@ -84,5 +86,55 @@ public class LoginController {
     @FXML
     private void goToRegister() {
         App.loadScene("Register.fxml", "Register — Handmade Marketplace");
+    }
+    private void ensureDefaultAdminAccount() {
+        try (Connection conn = DBConnection.getConnection()) {
+            try (PreparedStatement check = conn.prepareStatement(
+                    "SELECT user_id FROM users WHERE username = 'admin' LIMIT 1");
+                 ResultSet rs = check.executeQuery()) {
+                if (rs.next()) {
+                    resetAdminPassword(conn, rs.getInt("user_id"));
+                    return;
+                }
+            }
+
+            String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt(12));
+            String sql = "INSERT INTO users "
+                    + "(first_name, last_name, username, email, password_hash, role, date_of_birth) "
+                    + "VALUES (?, ?, ?, ?, ?, 'admin', ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, "System");
+                ps.setString(2, "Admin");
+                ps.setString(3, "admin");
+                ps.setString(4, "admin@sparkcraft.local");
+                ps.setString(5, passwordHash);
+                ps.setDate(6, Date.valueOf("1990-01-01"));
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.err.println("[Login] Could not create default admin account: " + e.getMessage());
+        }
+    }
+
+    private void resetAdminPassword(Connection conn, int userId) throws SQLException {
+        String passwordHash = BCrypt.hashpw("admin123", BCrypt.gensalt(12));
+        try (PreparedStatement ps = conn.prepareStatement(
+                "UPDATE users SET first_name = 'System', last_name = 'Admin', "
+                        + "email = 'admin@sparkcraft.local', role = 'admin', password_hash = ? "
+                        + "WHERE user_id = ?")) {
+            ps.setString(1, passwordHash);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    private String normalizeBCryptHash(String hash) {
+        if (hash == null) {
+            return null;
+        }
+        String normalized = hash.trim()
+                .replace("$2y$", "$2a$")
+                .replace("$2b$", "$2a$");
+        return normalized.matches("^\\$2a\\$\\d\\d\\$[./A-Za-z0-9]{53}$") ? normalized : null;
     }
 }

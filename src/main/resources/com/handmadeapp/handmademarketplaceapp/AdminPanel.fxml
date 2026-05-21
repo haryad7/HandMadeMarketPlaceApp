@@ -35,7 +35,7 @@
         <VBox>
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
 
-            <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+            <TabPane fx:id="adminTabs" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
 
                 <!-- ═══ USERS TAB ═══ -->
                 <Tab text="Users">
@@ -57,7 +57,7 @@
                                 <TableColumn fx:id="uColEmail"  text="Email"     prefWidth="240"/>
                                 <TableColumn fx:id="uColRole"   text="Role"      prefWidth="100"/>
                                 <TableColumn fx:id="uColStatus" text="Status"    prefWidth="100"/>
-                                <TableColumn fx:id="uColAction" text="Actions"   prefWidth="220"/>
+                                <TableColumn fx:id="uColAction" text="Actions"   prefWidth="120"/>
                             </columns>
                         </TableView>
 

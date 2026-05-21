@@ -57,24 +57,24 @@
             </HBox>
 
             <!-- ═══ CHARTS ═══ -->
-            <HBox spacing="14" VBox.vgrow="ALWAYS">
+            <HBox spacing="14">
                 <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="6">
                     <Label text="Revenue by Shop (top 6)" styleClass="card-title"/>
-                    <BarChart fx:id="revenueChart" legendVisible="false" VBox.vgrow="ALWAYS">
+                    <BarChart fx:id="revenueChart" prefHeight="260" legendVisible="false" VBox.vgrow="ALWAYS">
                         <xAxis><CategoryAxis fx:id="revenueX"/></xAxis>
                         <yAxis><NumberAxis    fx:id="revenueY"/></yAxis>
                     </BarChart>
                 </VBox>
                 <VBox styleClass="card" prefWidth="380" spacing="6">
                     <Label text="Orders by Status" styleClass="card-title"/>
-                    <PieChart fx:id="statusChart" VBox.vgrow="ALWAYS"/>
+                    <PieChart fx:id="statusChart" prefHeight="260" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </HBox>
 
             <!-- ═══ TABLE ═══ -->
-            <VBox styleClass="card" spacing="8">
+            <VBox styleClass="card" spacing="8" VBox.vgrow="ALWAYS">
                 <Label text="Recent Orders" styleClass="card-title"/>
-                <TableView fx:id="recentTable" prefHeight="200">
+                <TableView fx:id="recentTable" prefHeight="360" VBox.vgrow="ALWAYS">
                     <columns>
                         <TableColumn fx:id="rColId"     text="Order #" prefWidth="80"/>
                         <TableColumn fx:id="rColBuyer"  text="Buyer"   prefWidth="200"/>

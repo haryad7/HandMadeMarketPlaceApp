@@ -20,6 +20,11 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
+        primaryStage.maximizedProperty().addListener((obs, wasMaximized, isMaximized) -> {
+            if (!isMaximized) {
+                Platform.runLater(() -> primaryStage.setMaximized(true));
+            }
+        });
         primaryStage.setMaximized(true);
         loadScene("login.fxml", "SparkCraft - Login");
     }
@@ -49,9 +54,6 @@ public class App extends Application {
 
             // Step 2 — load and display
             boolean wasFullScreen = primaryStage.isFullScreen();
-            boolean wasMaximized = primaryStage.isMaximized();
-            double width = primaryStage.getWidth();
-            double height = primaryStage.getHeight();
 
             FXMLLoader loader = new FXMLLoader(resource);
             Parent root = loader.load();
@@ -59,14 +61,12 @@ public class App extends Application {
             Scene scene = new Scene(root);
             primaryStage.setTitle(title);
             primaryStage.setScene(scene);
-            if (width > 0 && height > 0 && !wasMaximized && !wasFullScreen) {
-                primaryStage.setWidth(width);
-                primaryStage.setHeight(height);
-            }
             primaryStage.show();
-            primaryStage.setMaximized(wasMaximized);
+            primaryStage.setMaximized(true);
             if (wasFullScreen) {
                 Platform.runLater(() -> primaryStage.setFullScreen(true));
+            } else {
+                Platform.runLater(() -> primaryStage.setMaximized(true));
             }
 
         } catch (Exception e) {

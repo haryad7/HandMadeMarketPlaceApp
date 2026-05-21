@@ -22,17 +22,19 @@ public class OrderManagementController {
     public static class OrderRow {
         private final int    orderId;
         private final String buyer;
+        private final String seller;
         private final double total;
         private final String date;
         private final String status;
         private final String address;
-        public OrderRow(int orderId, String buyer, double total,
+        public OrderRow(int orderId, String buyer, String seller, double total,
                         String date, String status, String address) {
-            this.orderId = orderId; this.buyer = buyer; this.total = total;
+            this.orderId = orderId; this.buyer = buyer; this.seller = seller; this.total = total;
             this.date = date; this.status = status; this.address = address;
         }
         public int    getOrderId() { return orderId; }
         public String getBuyer()   { return buyer; }
+        public String getSeller()  { return seller; }
         public double getTotal()   { return total; }
         public String getDate()    { return date; }
         public String getStatus()  { return status; }
@@ -43,7 +45,7 @@ public class OrderManagementController {
     @FXML private ComboBox<String>    statusFilter, newStatusBox;
     @FXML private TableView<OrderRow> ordersTable;
     @FXML private TableColumn<OrderRow, Integer> colId;
-    @FXML private TableColumn<OrderRow, String>  colBuyer, colDate, colStatus, colAddress;
+    @FXML private TableColumn<OrderRow, String>  colBuyer, colSeller, colDate, colStatus, colAddress;
     @FXML private TableColumn<OrderRow, Double>  colTotal;
     @FXML private Label statusMsg;
 
@@ -51,6 +53,7 @@ public class OrderManagementController {
     public void initialize() {
         colId     .setCellValueFactory(new PropertyValueFactory<>("orderId"));
         colBuyer  .setCellValueFactory(new PropertyValueFactory<>("buyer"));
+        if (colSeller != null) colSeller.setCellValueFactory(new PropertyValueFactory<>("seller"));
         colTotal  .setCellValueFactory(new PropertyValueFactory<>("total"));
         colDate   .setCellValueFactory(new PropertyValueFactory<>("date"));
         colStatus .setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -80,15 +83,19 @@ public class OrderManagementController {
         if (u == null) { statusMsg.setText("Not logged in."); return; }
 
         ObservableList<OrderRow> rows = FXCollections.observableArrayList();
+        boolean isAdmin = "admin".equalsIgnoreCase(u.getRole());
+
         StringBuilder sql = new StringBuilder(
             "SELECT o.order_id, o.total_amount, o.order_date, o.status, " +
             "       CONCAT(u.first_name,' ',u.last_name) AS buyer, " +
+            "       CONCAT(su.first_name,' ',su.last_name) AS seller, " +
             "       CONCAT(IFNULL(a.address_line1,''), ', ', IFNULL(a.city,'')) AS addr " +
             "FROM orders o " +
             "JOIN users u  ON o.buyer_id = u.user_id " +
             "LEFT JOIN addresses a ON o.shipping_address_id = a.address_id " +
             "JOIN shops s ON o.shop_id = s.shop_id " +
-            "WHERE s.owner_id = ? "
+            "LEFT JOIN users su ON s.owner_id = su.user_id " +
+            (isAdmin ? "WHERE 1=1 " : "WHERE s.owner_id = ? ")
         );
 
         String statusF = statusFilter.getValue();
@@ -97,7 +104,8 @@ public class OrderManagementController {
         String search = searchField.getText() == null ? "" : searchField.getText().trim();
         if (!search.isEmpty()) sql.append(
                 "AND (CAST(o.order_id AS CHAR) LIKE ? " +
-                "  OR CONCAT(u.first_name,' ',u.last_name) LIKE ?) "
+                "  OR CONCAT(u.first_name,' ',u.last_name) LIKE ? " +
+                "  OR CONCAT(su.first_name,' ',su.last_name) LIKE ?) "
         );
 
         sql.append("ORDER BY o.order_date DESC");
@@ -105,9 +113,10 @@ public class OrderManagementController {
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql.toString())) {
             int idx = 1;
-            ps.setInt(idx++, u.getUserId());
+            if (!isAdmin) ps.setInt(idx++, u.getUserId());
             if (statusF != null && !"All".equals(statusF)) ps.setString(idx++, statusF);
             if (!search.isEmpty()) {
+                ps.setString(idx++, "%" + search + "%");
                 ps.setString(idx++, "%" + search + "%");
                 ps.setString(idx++, "%" + search + "%");
             }
@@ -116,6 +125,7 @@ public class OrderManagementController {
                     rows.add(new OrderRow(
                             rs.getInt   ("order_id"),
                             rs.getString("buyer"),
+                            rs.getString("seller"),
                             rs.getDouble("total_amount"),
                             String.valueOf(rs.getTimestamp("order_date")),
                             rs.getString("status"),

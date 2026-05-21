@@ -115,22 +115,24 @@ public class DashboardController implements Initializable {
     /* ─── Admin navigation ────────────────────────────────────────── */
     @FXML
     private void goManageUsers() {
-        comingSoon("Manage Users");
+        AdminPanelController.setInitialTab("users");
+        navigate("AdminPanel.fxml", "SparkCraft - Admin Panel");
     }
 
     @FXML
     private void goManageProductsAdmin() {
-        comingSoon("Manage Products (Admin)");
+        AdminPanelController.setInitialTab("products");
+        navigate("AdminPanel.fxml", "SparkCraft - Admin Panel");
     }
 
     @FXML
     private void goMonitorOrders() {
-        comingSoon("Monitor Orders");
+        navigate("OrderManagement.fxml", "SparkCraft - Monitor Orders");
     }
 
     @FXML
     private void goReports() {
-        comingSoon("View Reports");
+        navigate("Reports.fxml", "SparkCraft - Reports");
     }
 
     /* ─── Shared ──────────────────────────────────────────────────── */
